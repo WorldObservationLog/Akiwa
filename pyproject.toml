@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "akiwa"
+version = "0.1.0"
+description = ""
+authors = ["WorldObservationLog <wolc@duck.com>"]
+license = "AGPL-3.0"
+readme = "README.md"
+packages = [{ include = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+graia-broadcast = "^0.19.1"
+graia-scheduler = "^0.1.4"
+bilibili-api-python = "^14.0.0"
+motor = "^3.1.1"
+pydantic = "^1.10.4"
+websockets = "^10.4"
+creart = "^0.2.2"
+creart-graia = "^0.1.5"
+tomli = "^2.0.1"
+graia-saya = "^0.0.17"
+bili-danmu = "^0.2.3"
+
+
+[tool.poetry.group.dev.dependencies]
+debugpy = "^1.6.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
