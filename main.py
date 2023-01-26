@@ -1,4 +1,5 @@
 import asyncio
+import time
 
 from creart import create, it, add_creator
 from graia.broadcast import Broadcast
@@ -24,5 +25,5 @@ with saya.module_context():
     saya.require("src.receivers.danmu")
 
 if __name__ == "__main__":
-    it(Broadcast).postEvent(CollectorStartEvent())
+    it(Broadcast).postEvent(CollectorStartEvent(timestamp=int(time.time())))
     it(Broadcast).loop.run_forever()
