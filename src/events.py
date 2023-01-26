@@ -4,7 +4,7 @@ import time
 
 
 class Event(Dispatchable, BaseModel):
-    timestamp = int(time.time())
+    timestamp: int
 
     class Dispatcher(BaseDispatcher):
         @staticmethod

@@ -2,8 +2,17 @@ from motor import motor_asyncio as motor
 from creart import it, AbstractCreator, CreateTargetInfo, exists_module
 
 from src.events import DanmuReceivedEvent
-from src.types import Live
+from src.types import *
 from .config import Config
+
+
+DANMU_MATCHES = {"DANMU_MSG": DANMU_MSG,
+                 "INTERACT_WORD": INTERACT_WORD,
+                 "ENTRY_EFFECT": ENTRY_EFFECT,
+                 "SEND_GIFT": SEND_GIFT,
+                 "COMBO_SEND": COMBO_SEND,
+                 "SUPER_CHAT_MESSAGE": SUPER_CHAT_MESSAGE,
+                 "GUARD_BUY": GUARD_BUY}
 
 
 class Database:
@@ -13,8 +22,16 @@ class Database:
     async def add_danmu(self, danmu: DanmuReceivedEvent):
         await self._db.danmu.insert_one(danmu.dict())
 
-    async def get_danmu(self, command: str, room_id: int):
-        pass
+    async def get_danmu(self, live: Live) -> List[Danmu]: 
+        result = []
+        danmus = await self._db.danmu.find({"$and": [{"$and": [{"timestamp": {"$gte": live.start_time}},{"timestamp": {"$lte": live.end_time}}]},{"room_id": {"$eq": live.room_id}}]}).to_list()
+        for danmu in danmus:
+            if danmu["command"] in DANMU_MATCHES.keys():
+                result.append(Danmu(room_id=danmu["room_id"], 
+                                    timestamp=danmu["timestamp"],
+                                    command=danmu["command"],
+                                    data=DANMU_MATCHES.get(danmu["command"]).parse_obj(danmu["data"])))
+        return result
 
     async def add_live(self, live: Live):
         await self._db.live.insert_one(live.dict())
