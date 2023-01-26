@@ -1,3 +1,4 @@
+from enum import Enum
 from pydantic import BaseModel
 from typing import Any, List, Union
 
@@ -10,6 +11,12 @@ class Live(BaseModel):
 
 class DanmuItem(BaseModel):
     ...
+
+class Danmu(BaseModel):
+    room_id: int
+    timestamp: int
+    command: str
+    data: DanmuItem
 
 class Contribution(BaseModel):
     grade: int
@@ -326,4 +333,22 @@ class DANMU_MSG(DanmuItem):
             privilege_type=danmu[7],
         )
 
+class Commands(Enum):
+    INTERACT_WORD = "INTERACT_WORD"
+    DANMU_MSG = "DANMU_MSG"
+    ENTRY_EFFECT = "ENTRY_EFFECT"
+    SEND_GIFT = "SEND_GIFT"
+    COMBO_SEND = "COMBO_SEND"
+    SUPER_CHAT_MESSAGE = "SUPER_CHAT_MESSAGE"
+    GUARD_BUY = "GUARD_BUY"
 
+class GUARD_BUY(DanmuItem):
+    uid: int
+    username: str
+    guard_level: int
+    num: int
+    price: int
+    gift_id: int
+    gift_name: str
+    start_time: int
+    end_time: int
