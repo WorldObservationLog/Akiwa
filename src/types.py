@@ -1,11 +1,9 @@
-from enum import Enum
 from pydantic import BaseModel
 from typing import Any, List, Union
 
 
 class Live(BaseModel):
     room_id: int
-    title: str
     start_time: int
     end_time: int
 
@@ -63,7 +61,7 @@ class MedalInfo(BaseModel):
     guard_level: int
     icon_id: int
     is_lighted: int
-    medal_color: int
+    medal_color: int | str
     medal_color_border: int
     medal_color_end: int
     medal_color_start: int
@@ -333,7 +331,7 @@ class DANMU_MSG(DanmuItem):
             privilege_type=danmu[7],
         )
 
-class Commands(Enum):
+class Commands:
     INTERACT_WORD = "INTERACT_WORD"
     DANMU_MSG = "DANMU_MSG"
     ENTRY_EFFECT = "ENTRY_EFFECT"

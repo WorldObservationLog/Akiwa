@@ -12,13 +12,13 @@ from src.events import CollectorStartEvent
 
 add_creator(ConfigCreator)
 create(Config)
+saya = create(Saya)
 
-from src.database import Database, DatabaseCreator
+from src.database.database import Database, DatabaseCreator
 
 add_creator(DatabaseCreator)
 create(Database)
 
-saya = create(Saya)
 
 with saya.module_context():
     saya.require("src.collectors.danmu")

@@ -32,3 +32,6 @@ class LiveStartEvent(Event):
 class LiveEndEvent(Event):
     room_id: int
 
+class GetFollowersEvent(Event):
+    uid: int
+    followers: int

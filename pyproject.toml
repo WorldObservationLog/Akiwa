@@ -20,6 +20,7 @@ creart-graia = "^0.1.5"
 tomli = "^2.0.1"
 graia-saya = "^0.0.17"
 bili-danmu = "^0.2.3"
+beanie = "^1.17.0"
 
 
 [tool.poetry.group.dev.dependencies]

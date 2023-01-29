@@ -1,7 +1,7 @@
 from motor import motor_asyncio as motor
 from creart import it, AbstractCreator, CreateTargetInfo, exists_module
 
-from src.events import DanmuReceivedEvent
+from src.events import DanmuReceivedEvent, HeartbeatReceivedEvent
 from src.types import *
 from .config import Config
 
@@ -39,8 +39,8 @@ class Database:
     async def get_latest_live(self, room_id: int):
         return await self._db.live.find({"room_id": {"$eq": room_id}}).sort("timestamp", -1).to_list(1)[0]
 
-
-
+    async def add_heartbeat(self, heartbeat: HeartbeatReceivedEvent):
+        await self._db.heartbeat.insert_one(heartbeat.dict())
 
 
 class DatabaseCreator(AbstractCreator):
