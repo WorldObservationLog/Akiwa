@@ -4,15 +4,15 @@ from loguru import logger
 
 from src.database.models import DB_TYPE_MATCHES, Medal, Danmu
 from src.events import DanmuReceivedEvent
-from src.types import Commands
+from src.types import Commands, DB_Types
 
-DB_TYPE_COMMAND_MAPPING = {"INTERACT_WORD": "Entry",
-                           "DANMU_MSG": "DanmuMsg",
-                           "ENTRY_EFFECT": "GuardEntry",
-                           "SEND_GIFT": "Gift",
-                           "COMBO_SEND": "Gift",
-                           "SUPER_CHAT_MESSAGE": "SuperChat",
-                           "GUARD_BUY": "Guard",
+DB_TYPE_COMMAND_MAPPING = {Commands.INTERACT_WORD: DB_Types.Entry,
+                           Commands.DANMU_MSG: DB_Types.DanmuMsg,
+                           Commands.ENTRY_EFFECT: DB_Types.GuardEntry,
+                           Commands.SEND_GIFT: DB_Types.Gift,
+                           Commands.COMBO_SEND: DB_Types.Gift,
+                           Commands.SUPER_CHAT_MESSAGE: DB_Types.SuperChat,
+                           Commands.GUARD_BUY: DB_Types.Guard
                            }
 
 

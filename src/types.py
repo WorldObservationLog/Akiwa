@@ -343,6 +343,18 @@ class DANMU_MSG(DanmuItem):
         )
 
 
+class GUARD_BUY(DanmuItem):
+    uid: int
+    username: str
+    guard_level: int
+    num: int
+    price: int
+    gift_id: int
+    gift_name: str
+    start_time: int
+    end_time: int
+
+
 class Commands:
     INTERACT_WORD = "INTERACT_WORD"
     DANMU_MSG = "DANMU_MSG"
@@ -355,13 +367,12 @@ class Commands:
     PREPARING = "PREPARING"
 
 
-class GUARD_BUY(DanmuItem):
-    uid: int
-    username: str
-    guard_level: int
-    num: int
-    price: int
-    gift_id: int
-    gift_name: str
-    start_time: int
-    end_time: int
+class DB_Types:
+    Guard = "Guard"
+    Gift = "Gift"
+    SuperChat = "SuperChat"
+    Entry = "Entry"
+    GuardEntry = "GuardEntry"
+    DanmuMsg = "DanmuMsg"
+    StartLive = "StartLive"
+    EndLive = "EndLive"

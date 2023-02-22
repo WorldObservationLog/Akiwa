@@ -48,14 +48,14 @@ class EndLive(DanmuItem):
     ...
 
 
-DB_TYPE_MATCHES = {"DanmuMsg": DanmuMsg,
-                   "Guard": Guard,
-                   "Gift": Gift,
-                   "SuperChat": SuperChat,
-                   "Entry": Entry,
-                   "GuardEntry": GuardEntry,
-                   "StartLive": StartLive,
-                   "EndLive": EndLive}
+DB_TYPE_MATCHES = {DB_Types.DanmuMsg: DanmuMsg,
+                   DB_Types.Guard: Guard,
+                   DB_Types.Gift: Gift,
+                   DB_Types.SuperChat: SuperChat,
+                   DB_Types.Entry: Entry,
+                   DB_Types.GuardEntry: GuardEntry,
+                   DB_Types.StartLive: StartLive,
+                   DB_Types.EndLive: EndLive}
 
 
 class Danmu(Document):
