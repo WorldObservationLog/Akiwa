@@ -1,24 +1,20 @@
 import asyncio
 import struct
 import time
+
+from creart import it
+from danmu import DanmuClient
+from graia.saya import Saya, Channel
 from graia.saya.builtins.broadcast.behaviour import ListenerSchema
 
-from pydantic import BaseModel
-from typing import Union
-from danmu import DanmuClient
-from creart import it
-from graia.saya import Saya, Channel
-from graia.saya.event import SayaModuleInstalled
-
 from src.collectors import bcc
-from src.events import CollectorStartEvent, DanmuReceivedEvent, HeartbeatReceivedEvent, LiveStartEvent, LiveEndEvent
 from src.config import Config
+from src.events import CollectorStartEvent, DanmuReceivedEvent, HeartbeatReceivedEvent, LiveStartEvent, LiveEndEvent
 from src.types import DANMU_MSG
 
 saya = Saya.current()
 channel = Channel.current()
 config = it(Config).config
-
 
 
 @channel.use(ListenerSchema(listening_events=[CollectorStartEvent]))

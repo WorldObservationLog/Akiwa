@@ -1,22 +1,24 @@
-from dataclasses import dataclass
-from typing import List
-from creart import it
-from src.database.database import Database
 from decimal import Decimal, getcontext
+from typing import List
+
+from creart import it
+
+from src.database.database import Database
 
 db = it(Database)
 getcontext().prec = 5
 
+
 class LiveAnalysis:
     audiences: int = 0
-    fans_change: int  = 0# TODO
-    medals_change: int = 0 # TODO
+    fans_change: int = 0
+    medals_change: int = 0
     total_revenue: Decimal = Decimal(0)
     gift_revenue: Decimal = Decimal(0)
     superchat_revenue: Decimal = Decimal(0)
     guard_revenue: Decimal = Decimal(0)
     send_gift_times: int = 0
-    live_duration: int = 0 # second
+    live_duration: int = 0  # second
     danmus: int = 0
     guards: int = 0
     superchats: int = 0
@@ -26,7 +28,7 @@ class LiveAnalysis:
     average_watchtime: float = 0.0
     interactor_average_danmu: float = 0.0
     interactor_average_interact: float = 0.0
-    interactor_average_watchtime:  float = 0.0
+    interactor_average_watchtime: float = 0.0
 
 
 class AudienceAnalysis:
@@ -76,6 +78,7 @@ class OverallAudienceAnalysis:
     guard_fans_interact_message_times: int = 0
     guard_fans_danmu_times: int = 0
 
+
 class RevenueAnalysics:
     total: Decimal = Decimal(0)
     gift: Decimal = Decimal(0)
@@ -90,7 +93,3 @@ class RevenueAnalysics:
     medium_revenue: Decimal = Decimal(0)
     # 100+
     big_revenue: Decimal = Decimal(0)
-
-
-
-

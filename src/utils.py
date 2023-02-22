@@ -2,9 +2,9 @@ import time
 
 from loguru import logger
 
+from src.database.models import DB_TYPE_MATCHES, Medal, Danmu
 from src.events import DanmuReceivedEvent
 from src.types import Commands
-from src.database.models import DB_TYPE_MATCHES, Medal, Danmu
 
 DB_TYPE_COMMAND_MAPPING = {"INTERACT_WORD": "Entry",
                            "DANMU_MSG": "DanmuMsg",

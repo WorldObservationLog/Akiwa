@@ -1,9 +1,8 @@
 from typing import Optional, Literal
 
-from beanie import Document, UnionDoc
-from pydantic import BaseModel, root_validator
+from beanie import Document
+
 from src.types import *
-from loguru import logger
 
 
 class Medal(BaseModel):

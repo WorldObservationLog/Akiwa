@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from typing import Any, List, Union
+
+from pydantic import BaseModel
 
 
 class Live(BaseModel):

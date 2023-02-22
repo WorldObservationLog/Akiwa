@@ -1,16 +1,17 @@
 from decimal import Decimal
 from typing import List
+
 from creart import it
-from loguru import logger
+
 from src.analytics.types import AudienceAnalysis, LiveAnalysis, OverallAudienceAnalysis, RevenueAnalysics
 from src.config import Config
-
 from src.database.database import Database
 from src.database.models import DB_TYPE_MATCHES
-from src.types import SEND_GIFT, Live, Commands
+from src.types import Live, Commands
 
 db = it(Database)
 config = it(Config).config
+
 
 class Analytics:
 
@@ -61,7 +62,7 @@ class Analytics:
                         case Commands.GUARD_BUY:
                             a_ana.guard += 1
                             a_ana.revenue += Decimal(danmu.data.price) / 1000
-                
+
                     match interact_sign:
                         case "START":
                             if danmu.command in [Commands.INTERACT_WORD, Commands.ENTRY_EFFECT]:
@@ -94,7 +95,7 @@ class Analytics:
         a_ana.interact = a_ana.danmu + a_ana.gift + a_ana.superchat + a_ana.guard
 
         return a_ana
-    
+
     def get_overall_audience_analytics(self, audiences: List[AudienceAnalysis]):
         oa_ana = OverallAudienceAnalysis()
         for ana in audiences:
@@ -108,9 +109,9 @@ class Analytics:
                     oa_ana.non_fans_interact_message_times += ana.interact
                     oa_ana.non_fans_danmu_times += ana.danmu
                 case num if 1 <= num < 6:
-                   oa_ana.primary_fans += 1
-                   oa_ana.primary_fans_interact_message_times += ana.interact
-                   oa_ana.primary_fans_danmu_times += ana.danmu
+                    oa_ana.primary_fans += 1
+                    oa_ana.primary_fans_interact_message_times += ana.interact
+                    oa_ana.primary_fans_danmu_times += ana.danmu
                 case num if 6 <= num < 11:
                     oa_ana.intermediate_fans += 1
                     oa_ana.intermediate_fans_interact_message_times += ana.interact
@@ -124,7 +125,7 @@ class Analytics:
                     oa_ana.guard_fans_interact_message_times += ana.interact
                     oa_ana.guard_fans_danmu_times += ana.danmu
         return oa_ana
-    
+
     def get_revenge_analytics(self):
         r_ana = RevenueAnalysics()
         for danmu in self.danmus:
@@ -135,9 +136,9 @@ class Analytics:
                         r_ana.total += price
                         r_ana.gift += price
                         r_ana.gift_with_time.append(
-                                {"time": danmu.timestamp - self.live.start_time,
-                                 "price": price}
-                                )
+                            {"time": danmu.timestamp - self.live.start_time,
+                             "price": price}
+                        )
                         if price <= 10:
                             r_ana.small_revenue += price
                         elif price <= 100:
@@ -191,7 +192,8 @@ class Analytics:
                     audiences.append(danmu.data.uid)
         interactors = []
         for danmu in self.danmus:
-            if danmu.command in [Commands.DANMU_MSG, Commands.SUPER_CHAT_MESSAGE, Commands.GUARD_BUY, Commands.COMBO_SEND, Commands.SEND_GIFT]:
+            if danmu.command in [Commands.DANMU_MSG, Commands.SUPER_CHAT_MESSAGE, Commands.GUARD_BUY,
+                                 Commands.COMBO_SEND, Commands.SEND_GIFT]:
                 if not danmu.data.uid in interactors:
                     interactors.append(danmu.data.uid)
         r_ana = self.get_revenge_analytics()

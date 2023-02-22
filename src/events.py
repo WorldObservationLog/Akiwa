@@ -1,6 +1,5 @@
 from graia.broadcast import BaseDispatcher, Dispatchable, DispatcherInterface
 from pydantic import BaseModel
-import time
 
 
 class Event(Dispatchable, BaseModel):
@@ -26,11 +25,14 @@ class HeartbeatReceivedEvent(Event):
 class CollectorStartEvent(Event):
     ...
 
+
 class LiveStartEvent(Event):
     room_id: int
 
+
 class LiveEndEvent(Event):
     room_id: int
+
 
 class GetFollowersEvent(Event):
     uid: int
