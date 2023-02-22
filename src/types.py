@@ -7,8 +7,10 @@ class Live(BaseModel):
     start_time: int
     end_time: int
 
+
 class DanmuItem(BaseModel):
     ...
+
 
 class Danmu(BaseModel):
     room_id: int
@@ -16,8 +18,10 @@ class Danmu(BaseModel):
     command: str
     data: DanmuItem
 
+
 class Contribution(BaseModel):
     grade: int
+
 
 class FansMedal(BaseModel):
     anchor_roomid: int
@@ -54,6 +58,7 @@ class INTERACT_WORD(DanmuItem):
     uid: int
     uname: str
     uname_color: str
+
 
 class MedalInfo(BaseModel):
     anchor_roomid: int
@@ -159,6 +164,7 @@ class COMBO_SEND(DanmuItem):
     uid: int
     uname: str
 
+
 class ENTRY_EFFECT(DanmuItem):
     id: int
     uid: int
@@ -189,10 +195,12 @@ class ENTRY_EFFECT(DanmuItem):
     web_dynamic_url_apng: str
     mobile_dynamic_url_webp: str
 
+
 class Gift(BaseModel):
     gift_id: int
     gift_name: str
     num: int
+
 
 class UserInfo(BaseModel):
     face: str
@@ -207,6 +215,7 @@ class UserInfo(BaseModel):
     title: str
     uname: str
     user_level: int
+
 
 class SUPER_CHAT_MESSAGE(DanmuItem):
     background_bottom_color: str
@@ -236,6 +245,7 @@ class SUPER_CHAT_MESSAGE(DanmuItem):
     ts: int
     uid: int
     user_info: UserInfo
+
 
 class DANMU_MSG(DanmuItem):
     mode: int
@@ -331,6 +341,7 @@ class DANMU_MSG(DanmuItem):
             privilege_type=danmu[7],
         )
 
+
 class Commands:
     INTERACT_WORD = "INTERACT_WORD"
     DANMU_MSG = "DANMU_MSG"
@@ -339,6 +350,9 @@ class Commands:
     COMBO_SEND = "COMBO_SEND"
     SUPER_CHAT_MESSAGE = "SUPER_CHAT_MESSAGE"
     GUARD_BUY = "GUARD_BUY"
+    LIVE = "LIVE"
+    PREPARING = "PREPARING"
+
 
 class GUARD_BUY(DanmuItem):
     uid: int

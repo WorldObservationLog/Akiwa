@@ -6,7 +6,7 @@ from src.analytics.types import AudienceAnalysis, LiveAnalysis, OverallAudienceA
 from src.config import Config
 
 from src.database.database import Database
-from src.database.models import DANMU_MATCHES
+from src.database.models import DB_TYPE_MATCHES
 from src.types import SEND_GIFT, Live, Commands
 
 db = it(Database)
@@ -25,7 +25,7 @@ class Analytics:
         audience_latest_time = self.live.start_time
 
         for danmu in self.danmus:
-            if danmu.command in DANMU_MATCHES.keys():
+            if danmu.command in DB_TYPE_MATCHES.keys():
                 if danmu.data.uid == uid:
                     match danmu.command:
                         case Commands.SEND_GIFT | Commands.COMBO_SEND | Commands.SUPER_CHAT_MESSAGE:
@@ -186,7 +186,7 @@ class Analytics:
         l_ana = LiveAnalysis()
         audiences = []
         for danmu in self.danmus:
-            if danmu.command in DANMU_MATCHES.keys():
+            if danmu.command in DB_TYPE_MATCHES.keys():
                 if not danmu.data.uid in audiences:
                     audiences.append(danmu.data.uid)
         interactors = []

@@ -5,13 +5,14 @@ from graia.broadcast import Broadcast
 from motor.motor_asyncio import AsyncIOMotorClient
 from creart import it, AbstractCreator, CreateTargetInfo, exists_module
 
-
 from src.config import Config
 from src.events import DanmuReceivedEvent, HeartbeatReceivedEvent
+from src.utils import convert_danmu
 from .models import Danmu, Heartbeat, Live
 
 config = it(Config).config
 bcc = it(Broadcast)
+
 
 class Database:
     _client = AsyncIOMotorClient(config.conn_str)
@@ -20,13 +21,13 @@ class Database:
         bcc.loop.run_until_complete(init_beanie(database=self._client.eoe, document_models=[Danmu, Heartbeat, Live]))
 
     async def add_danmu(self, danmu: DanmuReceivedEvent):
-        await Danmu.parse_obj(danmu.dict()).insert()
-    
+        await convert_danmu(danmu).insert()
+
     async def get_danmu(self, live: Live):
-        return await Danmu.find_many(And(
+        return await Danmu.find_many(
             Danmu.room_id == live.room_id,
             Danmu.timestamp >= live.start_time,
-            Danmu.timestamp <= live.end_time)).to_list()
+            Danmu.timestamp <= live.end_time).to_list()
 
     async def add_live(self, live: Live):
         await Live.parse_obj(live.dict()).insert()
@@ -41,7 +42,7 @@ class Database:
         await Heartbeat.parse_obj(heartbeat.dict()).insert()
 
     async def get_heartbeat(self, live: Live):
-         return await Heartbeat.find_many(Heartbeat.room_id == live.room_id,
+        return await Heartbeat.find_many(Heartbeat.room_id == live.room_id,
                                          Heartbeat.timestamp >= live.start_time,
                                          Heartbeat.timestamp <= live.end_time).to_list()
 
