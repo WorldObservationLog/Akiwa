@@ -23,7 +23,8 @@ async def danmu_receiver(event: DanmuReceivedEvent):
 @channel.use(ListenerSchema(listening_events=[HeartbeatReceivedEvent]))
 async def heartbeat_receiver(event: HeartbeatReceivedEvent):
     logger.info(f"Received Heartbeat from room {event.room_id}, watching: {event.watching}")
-    await db.add_heartbeat(event)
+    if event.watching > 1:
+        await db.add_heartbeat(event)
 
 
 @channel.use(ListenerSchema(listening_events=[LiveStartEvent]))
