@@ -26,6 +26,8 @@ def convert_danmu(danmu: DanmuReceivedEvent):
             medal_info = None
         case Commands.INTERACT_WORD:
             medal_info = danmu.data.get("fans_medal")
+            if not medal_info.get("anchor_roomid"):
+                medal_info = None
         case _:
             medal_info = danmu.data.get("medal_info")
 
