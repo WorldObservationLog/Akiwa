@@ -49,7 +49,7 @@ class Database:
     async def if_same_live(self, room_id: int, timestamp: int):
         room_info = await LiveRoom(room_id).get_room_info()
         latest_live = await self.get_latest_live(room_id)
-        if latest_live.title == room_info["title"] and timestamp - latest_live.start_time < 300:
+        if latest_live.title == room_info["room_info"]["title"] and timestamp - latest_live.start_time < 300:
             return True
         return False
 

@@ -32,7 +32,10 @@ async def heartbeat_receiver(event: HeartbeatReceivedEvent):
 async def live_start_receiver(event: LiveStartEvent):
     logger.info(f"Room {event.room_id} Live Started!")
     room_info = await LiveRoom(event.room_id).get_room_info()
-    await db.add_live(Live(room_id=event.room_id, start_time=event.timestamp, end_time=0, title=room_info["title"]))
+    await db.add_live(Live(room_id=event.room_id,
+                           start_time=event.timestamp,
+                           end_time=0,
+                           title=room_info["room_info"]["title"]))
 
 
 @channel.use(ListenerSchema(listening_events=[LiveEndEvent]))
