@@ -2,6 +2,7 @@ from beanie import init_beanie
 from creart import it, AbstractCreator, CreateTargetInfo, exists_module
 from graia.broadcast import Broadcast
 from motor.motor_asyncio import AsyncIOMotorClient
+from bilibili_api.live import LiveRoom
 
 from src.config import Config
 from src.events import DanmuReceivedEvent, HeartbeatReceivedEvent
@@ -28,7 +29,8 @@ class Database:
             Danmu.timestamp <= live.end_time).to_list()
 
     async def add_live(self, live: Live):
-        await Live.parse_obj(live.dict()).insert()
+        if await self.if_same_live(live.room_id, live.start_time):
+            await Live.parse_obj(live.dict()).insert()
 
     async def get_latest_live(self, room_id: int):
         return await Live.find_one(Live.room_id == room_id)
@@ -43,6 +45,13 @@ class Database:
         return await Heartbeat.find_many(Heartbeat.room_id == live.room_id,
                                          Heartbeat.timestamp >= live.start_time,
                                          Heartbeat.timestamp <= live.end_time).to_list()
+
+    async def if_same_live(self, room_id: int, timestamp: int):
+        room_info = await LiveRoom(room_id).get_room_info()
+        latest_live = await self.get_latest_live(room_id)
+        if latest_live.title == room_info["title"] and timestamp - latest_live.start_time < 300:
+            return True
+        return False
 
 
 class DatabaseCreator(AbstractCreator):

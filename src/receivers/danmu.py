@@ -1,3 +1,4 @@
+from bilibili_api.live import LiveRoom
 from creart import it
 from graia.saya import Saya, Channel
 from graia.saya.builtins.broadcast.behaviour import ListenerSchema
@@ -30,7 +31,8 @@ async def heartbeat_receiver(event: HeartbeatReceivedEvent):
 @channel.use(ListenerSchema(listening_events=[LiveStartEvent]))
 async def live_start_receiver(event: LiveStartEvent):
     logger.info(f"Room {event.room_id} Live Started!")
-    await db.add_live(Live(room_id=event.room_id, start_time=event.timestamp, end_time=0))
+    room_info = await LiveRoom(event.room_id).get_room_info()
+    await db.add_live(Live(room_id=event.room_id, start_time=event.timestamp, end_time=0, title=room_info["title"]))
 
 
 @channel.use(ListenerSchema(listening_events=[LiveEndEvent]))

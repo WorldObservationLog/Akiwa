@@ -81,6 +81,7 @@ class Heartbeat(Document):
 
 class Live(Document):
     room_id: int
+    title: str
     start_time: int
     end_time: int
 
