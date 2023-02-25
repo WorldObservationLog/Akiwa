@@ -7,7 +7,7 @@ from loguru import logger
 from src.config import Config
 from src.database.database import Database
 from src.events import DanmuReceivedEvent, HeartbeatReceivedEvent, LiveEndEvent, LiveStartEvent
-from src.types import Live
+from src.database.models import Live
 
 saya = Saya.current()
 channel = Channel.current()

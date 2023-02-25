@@ -30,13 +30,13 @@ class Database:
 
     async def add_live(self, live: Live):
         if await self.if_same_live(live.room_id, live.start_time):
-            await Live.parse_obj(live.dict()).insert()
+            await Live.insert()
 
     async def get_latest_live(self, room_id: int):
         return await Live.find_one(Live.room_id == room_id)
 
     async def update_live(self, live: Live):
-        await Live.parse_obj(live.dict()).update()
+        await Live.update()
 
     async def add_heartbeat(self, heartbeat: HeartbeatReceivedEvent):
         await Heartbeat.parse_obj(heartbeat.dict()).insert()

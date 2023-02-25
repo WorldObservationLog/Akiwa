@@ -3,13 +3,6 @@ from typing import Any, List, Union
 from pydantic import BaseModel
 
 
-class Live(BaseModel):
-    room_id: int
-    start_time: int
-    end_time: int
-    title: str
-
-
 class DanmuItem(BaseModel):
     ...
 
