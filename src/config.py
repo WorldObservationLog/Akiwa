@@ -14,6 +14,7 @@ class Listening(BaseModel):
 class ConfigModel(BaseModel):
     listening: Listening
     conn_str: str
+    database_name: str
     commands: List[str]
 
 

@@ -17,7 +17,7 @@ class Database:
     _client = AsyncIOMotorClient(config.conn_str)
 
     def __init__(self):
-        bcc.loop.run_until_complete(init_beanie(database=self._client.eoe, document_models=[Danmu, Heartbeat, Live]))
+        bcc.loop.run_until_complete(init_beanie(database=self._client[config.database_name], document_models=[Danmu, Heartbeat, Live]))
 
     async def add_danmu(self, danmu: DanmuReceivedEvent):
         await convert_danmu(danmu).insert()
