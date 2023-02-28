@@ -29,14 +29,14 @@ class Database:
             Danmu.timestamp <= live.end_time).to_list()
 
     async def add_live(self, live: Live):
-        if await self.if_same_live(live.room_id, live.start_time):
-            await Live.insert()
+        if not await self.if_same_live(live.room_id, live.start_time):
+            await live.insert()
 
     async def get_latest_live(self, room_id: int):
         return await Live.find_one(Live.room_id == room_id)
 
     async def update_live(self, live: Live):
-        await Live.update()
+        await live.replace()
 
     async def add_heartbeat(self, heartbeat: HeartbeatReceivedEvent):
         await Heartbeat.parse_obj(heartbeat.dict()).insert()
@@ -49,8 +49,9 @@ class Database:
     async def if_same_live(self, room_id: int, timestamp: int):
         room_info = await LiveRoom(room_id).get_room_info()
         latest_live = await self.get_latest_live(room_id)
-        if latest_live.title == room_info["room_info"]["title"] and timestamp - latest_live.start_time < 300:
-            return True
+        if latest_live:
+            if latest_live.title == room_info["room_info"]["title"] and timestamp - latest_live.start_time < 300:
+                return True
         return False
 
 
