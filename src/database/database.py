@@ -17,7 +17,8 @@ class Database:
     _client = AsyncIOMotorClient(config.conn_str)
 
     def __init__(self):
-        bcc.loop.run_until_complete(init_beanie(database=self._client[config.database_name], document_models=[Danmu, Heartbeat, Live]))
+        bcc.loop.run_until_complete(init_beanie(database=self._client[config.database_name],
+                                                document_models=[Danmu, Heartbeat, Live]))
 
     async def add_danmu(self, danmu: DanmuReceivedEvent):
         await convert_danmu(danmu).insert()
@@ -33,7 +34,7 @@ class Database:
             await live.insert()
 
     async def get_latest_live(self, room_id: int):
-        return await Live.find_one(Live.room_id == room_id)
+        return await Live.find({}).to_list()
 
     async def update_live(self, live: Live):
         await live.replace()
@@ -50,7 +51,7 @@ class Database:
         room_info = await LiveRoom(room_id).get_room_info()
         latest_live = await self.get_latest_live(room_id)
         if latest_live:
-            if latest_live.title == room_info["room_info"]["title"] and timestamp - latest_live.start_time < 300:
+            if latest_live.title == room_info["room_info"]["title"] and timestamp - latest_live.start_time < 900:
                 return True
         return False
 
