@@ -52,7 +52,12 @@ def convert_danmu(danmu: DanmuReceivedEvent):
     match danmu.command:
         case Commands.DANMU_MSG:
             data = danmu_item(text=danmu.data.get("msg"))
-        case Commands.GUARD_BUY | Commands.SEND_GIFT:
+        case Commands.SEND_GIFT:
+            if danmu.data.get("coin_type") == "gold":
+                data = danmu_item(price=danmu.data.get("price") / 1000)
+            else:
+                data = danmu_item(price=0.0)
+        case Commands.GUARD_BUY:
             data = danmu_item(price=danmu.data.get("price") / 1000)
         case Commands.COMBO_SEND:
             data = danmu_item(price=danmu.data.get("combo_total_coin") / danmu.data.get("combo_num") / 1000)
