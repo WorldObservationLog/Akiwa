@@ -1,6 +1,7 @@
 from typing import Optional, Literal
 
 from beanie import Document
+from pydantic import root_validator
 
 from src.types import *
 
@@ -63,11 +64,16 @@ class Danmu(Document):
     room_id: int
     uid: Optional[int]
     type: Literal["DanmuMsg", "Guard", "Gift", "SuperChat", "Entry", "GuardEntry", "StartLive", "EndLive"]
-    medal: Optional[Medal]
+    medal: Medal | None
     data: Optional[DanmuItem]
 
     class Settings:
         name = "danmu"
+
+    @root_validator
+    def data_deserialization(cls, data: dict):
+        cls.parse_obj(data)
+        cls.data = DB_TYPE_MATCHES[data["type"]].parse_obj(data["data"])
 
 
 class Heartbeat(Document):
