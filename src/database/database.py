@@ -34,7 +34,7 @@ class Database:
             await live.insert()
 
     async def get_latest_live(self, room_id: int):
-        return await Live.find_one(Live.room_id == room_id)
+        return await Live.find_many(Live.room_id == room_id).sort(-Live.start_time).first_or_none()
 
     async def update_live(self, live: Live):
         await live.replace()
