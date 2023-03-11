@@ -11,8 +11,15 @@ class Listening(BaseModel):
     user: List[int]
 
 
+class Jieba(BaseModel):
+    words: List[str]
+    ignore_words: List[str]
+    stop_words: List[str]
+
+
 class ConfigModel(BaseModel):
     listening: Listening
+    jieba: Jieba
     conn_str: str
     database_name: str
     commands: List[str]

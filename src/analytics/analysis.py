@@ -69,13 +69,16 @@ class DanmuUtils:
     def get_danmu_msg(self):
         return self.db.search(self.danmu_query.type == DB_Types.DanmuMsg)
 
-    @cache
-    def segment_danmu_text(self):
+    def segment_danmu_text(self, words: list, ignore_words: list, stop_words: list):
+        for i in words:
+            jieba.suggest_freq(i, tune=True)
         result = []
         danmu_texts = [i["data"]["text"] for i in self.get_danmu_msg()]
-        for i in danmu_texts:
+        filtered_danmu_texts = list(filter(lambda a: a not in ignore_words, danmu_texts))
+        for i in filtered_danmu_texts:
             result.extend(jieba.lcut(i))
-        return result
+        filtered_result = list(filter(lambda a: a not in stop_words, result))
+        return filtered_result
 
 
 class Analysis:
