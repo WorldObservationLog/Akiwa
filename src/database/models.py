@@ -70,10 +70,11 @@ class Danmu(Document):
     class Settings:
         name = "danmu"
 
-    @root_validator
+    @root_validator(pre=True)
     def data_deserialization(cls, data: dict):
-        cls.parse_obj(data)
-        cls.data = DB_TYPE_MATCHES[data["type"]].parse_obj(data["data"])
+        if data.get("data"):
+            data["data"] = DB_TYPE_MATCHES[data["type"]].parse_obj(data["data"])
+        return data
 
 
 class Heartbeat(Document):
