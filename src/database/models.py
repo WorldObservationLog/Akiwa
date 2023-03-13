@@ -73,7 +73,8 @@ class Danmu(Document):
     @root_validator(pre=True)
     def data_deserialization(cls, data: dict):
         if data.get("data"):
-            data["data"] = DB_TYPE_MATCHES[data["type"]].parse_obj(data["data"])
+            if type(data.get("data")) == dict:
+                data["data"] = DB_TYPE_MATCHES[data["type"]].parse_obj(data["data"])
         return data
 
 
