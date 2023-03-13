@@ -65,6 +65,8 @@ def convert_danmu(danmu: DanmuReceivedEvent):
             data = danmu_item(price=danmu.data.get("price") / 1000)
         case Commands.COMBO_SEND:
             data = danmu_item(price=danmu.data.get("combo_total_coin") / danmu.data.get("combo_num") / 1000)
+        case Commands.SUPER_CHAT_MESSAGE:
+            data = danmu_item(price=danmu.data.get("price"), text=danmu.data.get("message"))
         case Commands.INTERACT_WORD | Commands.ENTRY_EFFECT | Commands.LIVE | Commands.PREPARING:
             data = danmu_item()
         case _:
