@@ -6,6 +6,7 @@ import pandas as pd
 import sys
 
 from pydantic import BaseModel
+import matplotlib.pyplot as plt
 
 sns.set_theme()
 
@@ -15,7 +16,12 @@ elif sys.platform == "linux":
     sns.set(font="Droid Sans Fallback")
 
 
-class ChartData(BaseModel):
+class PieData(BaseModel):
+    name: str
+    value: int | float
+
+
+class HistogramData(BaseModel):
     name: str
     value: int | float
     category: str
@@ -24,14 +30,35 @@ class ChartData(BaseModel):
         return [self.name, self.value, self.category]
 
 
-class Chart:
+class Pie:
+    data: List[PieData]
+    title: str
+
+    def set_title(self, title):
+        self.title = title
+        return self
+
+    def set_data(self, *data: PieData):
+        self.data = list(data)
+        return self
+
+    def make_pie(self):
+        plt.pie([i.value for i in self.data], labels=[i.name for i in self.data])
+        plt.title(self.title)
+        buf = BytesIO()
+        plt.savefig(buf, format="png")
+        buf.seek(0)
+        return buf.read()
+
+
+class Histogram:
     data: pd.DataFrame
     title: str
     x: str = "name"
     y: str = "value"
     hue: str = "category"
 
-    def set_data(self, *data: ChartData):
+    def set_data(self, *data: HistogramData):
         self.data = pd.DataFrame([i.array() for i in data], columns=[self.x, self.y, self.hue])
         return self
 
