@@ -29,7 +29,7 @@ class DanmuUtils:
                         self.danmu_query.medal.level >= medal_level_range[0]) & (
                                       self.danmu_query.medal.level <= medal_level_range[1])
         else:
-            medal_query = True
+            medal_query = self.danmu_query.medal.room_id != self.room_id
         return medal_query
 
     def get_audiences(self, medal_level_range: Optional[tuple] = None):
@@ -73,7 +73,7 @@ class DanmuUtils:
             jieba.suggest_freq(i, tune=True)
         result = []
         danmu_texts = [i["data"]["text"].upper() for i in self.get_danmu_msg()]
-        filtered_danmu_texts = list(filter(lambda a: a not in ignore_words, danmu_texts))
+        filtered_danmu_texts = list(filter(lambda a: a not in ignore_words or (a.startswith("[") and a.endswith("]")), danmu_texts))
         for i in filtered_danmu_texts:
             result.extend(jieba.lcut(i))
         filtered_result = list(filter(lambda a: a not in stop_words, result))
