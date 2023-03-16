@@ -1,5 +1,5 @@
 from io import BytesIO
-from typing import List, Tuple, Literal
+from typing import List, Literal
 
 import seaborn as sns
 import pandas as pd
@@ -18,16 +18,16 @@ elif sys.platform == "linux":
 
 class PieData(BaseModel):
     name: str
-    value: int | float
+    value: float
 
 
 class HistogramData(BaseModel):
     name: str
-    value: int | float
+    value: float
     category: str
 
     def array(self):
-        return [self.name, self.value, self.category]
+        return [self.name, str(self.value), self.category]
 
 
 class Pie:
@@ -43,11 +43,14 @@ class Pie:
         return self
 
     def make_pie(self):
-        plt.pie([i.value for i in self.data], labels=[i.name for i in self.data])
+        pie, _, labels = plt.pie([i.value for i in self.data], labels=[i.name for i in self.data], autopct="", textprops={'fontsize': 8})
         plt.title(self.title)
+        for i, j in zip(labels, [i.value for i in self.data]):
+            i.set_text(str(j))
         buf = BytesIO()
         plt.savefig(buf, format="png")
         buf.seek(0)
+        plt.clf()
         return buf.read()
 
 
@@ -60,6 +63,7 @@ class Histogram:
 
     def set_data(self, *data: HistogramData):
         self.data = pd.DataFrame([i.array() for i in data], columns=[self.x, self.y, self.hue])
+        self.data[[self.y]] = self.data[[self.y]].apply(pd.to_numeric)
         return self
 
     def set_title(self, title):
@@ -75,7 +79,10 @@ class Histogram:
         barplot.set(xlabel=None)
         barplot.set(ylabel=None)
         barplot.legend_.set_title(None)
+        for container in barplot.containers:
+            barplot.bar_label(container, fontsize=8)
         buf = BytesIO()
         barplot.get_figure().savefig(buf, format="png")
         buf.seek(0)
+        plt.clf()
         return buf.read()

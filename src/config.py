@@ -17,9 +17,26 @@ class Jieba(BaseModel):
     stop_words: List[str]
 
 
+class PlatformConfig(BaseModel):
+    name: str
+    template: str
+
+
+class Platform(BaseModel):
+    name: List[str]
+    config: List[PlatformConfig]
+
+    def find_platform_config(self, name: str):
+        for i in self.config:
+            if i.name == name:
+                return i
+        return None
+
+
 class ConfigModel(BaseModel):
     listening: Listening
     jieba: Jieba
+    platform: Platform
     conn_str: str
     database_name: str
     commands: List[str]
