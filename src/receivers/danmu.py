@@ -1,5 +1,6 @@
 from bilibili_api.live import LiveRoom
 from creart import it
+from graia.broadcast import Broadcast
 from graia.saya import Saya, Channel
 from graia.saya.builtins.broadcast.behaviour import ListenerSchema
 from loguru import logger
@@ -8,6 +9,7 @@ from src.config import Config
 from src.database.database import Database
 from src.events import DanmuReceivedEvent, HeartbeatReceivedEvent, LiveEndEvent, LiveStartEvent
 from src.database.models import Live
+from src.analytics.analysis import Analysis
 
 saya = Saya.current()
 channel = Channel.current()
@@ -44,3 +46,11 @@ async def live_end_receiver(event: LiveEndEvent):
     live = await db.get_latest_live(event.room_id)
     live.end_time = event.timestamp
     await db.update_live(live)
+    danmus = await db.get_danmu(live)
+
+    def generate_and_post_report():
+        ana = Analysis()
+        ana.init(live, danmus)
+        ana.post_report()
+
+    it(Broadcast).loop.run_in_executor(None, generate_and_post_report)

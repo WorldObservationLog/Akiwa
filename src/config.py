@@ -17,9 +17,15 @@ class Jieba(BaseModel):
     stop_words: List[str]
 
 
+class PostPlatform(BaseModel):
+    name: str
+    data: dict
+
+
 class PlatformConfig(BaseModel):
     name: str
     template: str
+    post_platform: PostPlatform
 
 
 class Platform(BaseModel):

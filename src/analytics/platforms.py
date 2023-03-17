@@ -6,9 +6,6 @@ from telegraph import Telegraph as Tel
 
 class Platform:
 
-    def init(self):
-        raise NotImplemented
-
     def upload_image(self, img: bytes) -> str:
         raise NotImplemented
 

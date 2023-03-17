@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 from creart import it
+from graia.broadcast import Broadcast
 from matplotlib.font_manager import fontManager
 from wordcloud import wordcloud
 from jinja2 import Environment, FileSystemLoader
@@ -13,6 +14,7 @@ from jinja2 import Environment, FileSystemLoader
 from src.analytics.chart import Histogram, HistogramData, PieData, Pie
 from src.analytics.danmu_utils import DanmuUtils
 from src.analytics.platforms import PLATFORM_MATCHES, Platform
+from src.analytics.post_platform import POST_PLATFORM_MATCHES
 from src.config import Config, ConfigModel
 from src.database.models import DB_Types, Live, Danmu
 
@@ -43,7 +45,7 @@ class Report:
         self.upload_images(platform_obj)
         template = jinja.get_template(name=it(Config).config.platform.find_platform_config(platform).template)
         report = template.render(report=self, platform=platform_obj)
-        platform_obj.send_report(report, title=f"【{self.live_title}】{ self.date }直播数据统计报告")
+        return platform_obj.send_report(report, title=f"{self.live_title} { self.date }直播数据统计报告")
 
 
 class Analysis:
@@ -163,4 +165,9 @@ class Analysis:
                                    revenue_type_scale=revenue_type_scale) \
             .set_title(self.live.title)
         for i in self.config.platform.name:
-            report.post_report(i)
+            report_url = report.post_report(i)
+            post_platform_config = self.config.platform.find_platform_config(i).post_platform
+            post_platform = POST_PLATFORM_MATCHES.get(post_platform_config.name)
+            if post_platform:
+                post_platform_obj = post_platform(bot_token=post_platform_config.data["bot_token"], loop=it(Broadcast).loop)
+                post_platform_obj.post_report(post_platform_config.data["target"], report_url)

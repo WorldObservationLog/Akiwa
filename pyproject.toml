@@ -28,6 +28,7 @@ jieba = "^0.42.1"
 wordcloud = "^1.8.2.2"
 telegraph = {extras = ["aio"], version = "^2.2.0"}
 jinja2 = "^3.1.2"
+python-telegram-bot = "^20.1"
 
 
 [tool.poetry.group.dev.dependencies]
