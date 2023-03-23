@@ -51,7 +51,7 @@ class Database:
         room_info = await LiveRoom(room_id).get_room_info()
         latest_live = await self.get_latest_live(room_id)
         if latest_live:
-            if latest_live.title == room_info["room_info"]["title"] and timestamp - latest_live.start_time < 900:
+            if latest_live.title == room_info["room_info"]["title"] and timestamp - latest_live.start_time < 3600:
                 return True
         return False
 
