@@ -1,24 +1,46 @@
-from io import BytesIO
-from typing import List, Literal
+import tempfile
+from typing import List, Literal, Tuple
+from pathlib import Path
 
-import seaborn as sns
-import pandas as pd
-import sys
+from pyecharts.globals import SymbolType
+from pyecharts.render import make_snapshot
+from pyecharts.charts import Pie as ecPie
+from pyecharts.charts import WordCloud as ecWordCloud
+from pyecharts.charts import Bar
+from pyecharts import options as opts
+from snapshot_selenium import snapshot
+import uuid
 
 from pydantic import BaseModel
-import matplotlib.pyplot as plt
 
-sns.set_theme()
 
-if sys.platform == "win32":
-    sns.set(font="SimHei")
-elif sys.platform == "linux":
-    sns.set(font="Droid Sans Fallback")
+class Chart:
+    def set_title(self, title: str):
+        return NotImplemented
+
+    def set_data(self, *data):
+        return NotImplemented
+
+    def make(self):
+        return NotImplemented
+
+    def render(self, chart_obj):
+        temp_dir = tempfile.TemporaryDirectory()
+        temp_html = str((Path(temp_dir.name) / Path(str(uuid.uuid4()) + ".html")).absolute())
+        chart = chart_obj.render(temp_html)
+        temp_img = str((Path(temp_dir.name) / Path(str(uuid.uuid4()) + ".png")).absolute())
+        make_snapshot(snapshot, chart, temp_img, pixel_ratio=1)
+        img = open(temp_img, "rb").read()
+        temp_dir.cleanup()
+        return img
 
 
 class PieData(BaseModel):
     name: str
     value: float
+
+    def list(self):
+        return [self.name, self.value]
 
 
 class HistogramData(BaseModel):
@@ -30,7 +52,7 @@ class HistogramData(BaseModel):
         return [self.name, str(self.value), self.category]
 
 
-class Pie:
+class Pie(Chart):
     data: List[PieData]
     title: str
 
@@ -42,47 +64,55 @@ class Pie:
         self.data = list(data)
         return self
 
-    def make_pie(self):
-        pie, _, labels = plt.pie([i.value for i in self.data], labels=[i.name for i in self.data], autopct="", textprops={'fontsize': 8})
-        plt.title(self.title)
-        for i, j in zip(labels, [i.value for i in self.data]):
-            i.set_text(str(j))
-        buf = BytesIO()
-        plt.savefig(buf, format="png")
-        buf.seek(0)
-        plt.clf()
-        return buf.read()
+    def make(self):
+        pie = ecPie(init_opts=opts.InitOpts(bg_color="#FFFFFF")) \
+            .add("", [i.list() for i in self.data]) \
+            .set_global_opts(title_opts=opts.TitleOpts(title=self.title)) \
+            .set_series_opts(label_opts=opts.LabelOpts(formatter="{b}: {c}"))
+        return self.render(pie)
 
 
-class Histogram:
-    data: pd.DataFrame
+class Histogram(Chart):
+    data: List[HistogramData]
     title: str
     x: str = "name"
     y: str = "value"
     hue: str = "category"
 
     def set_data(self, *data: HistogramData):
-        self.data = pd.DataFrame([i.array() for i in data], columns=[self.x, self.y, self.hue])
-        self.data[[self.y]] = self.data[[self.y]].apply(pd.to_numeric)
+        self.data = list(data)
         return self
 
     def set_title(self, title):
         self.title = title
         return self
 
-    def make_histogram(self, orient: Literal["v", "h"] = "v"):
-        if orient == "v":
-            barplot = sns.barplot(data=self.data, x=self.x, y=self.y, hue=self.hue, orient=orient)
-        else:
-            barplot = sns.barplot(data=self.data, x=self.y, y=self.x, hue=self.hue, orient=orient)
-        barplot.set_title(self.title)
-        barplot.set(xlabel=None)
-        barplot.set(ylabel=None)
-        barplot.legend_.set_title(None)
-        for container in barplot.containers:
-            barplot.bar_label(container, fontsize=8)
-        buf = BytesIO()
-        barplot.get_figure().savefig(buf, format="png")
-        buf.seek(0)
-        plt.clf()
-        return buf.read()
+    def make(self, orient: Literal["v", "h"] = "v"):
+        histogram = Bar(init_opts=opts.InitOpts(bg_color="#FFFFFF")) \
+            .add_xaxis(list(set([i.name for i in self.data]))) \
+            .set_global_opts(title_opts=opts.TitleOpts(title=self.title))
+        for j in list(set([i.category for i in self.data])):
+            values = [i.value for i in self.data if i.category == j]
+            histogram = histogram.add_yaxis(j, values)
+        if orient == "h":
+            histogram = histogram.reversal_axis().set_series_opts(label_opts=opts.LabelOpts(position="right"))
+        return self.render(histogram)
+
+
+class WordCloud(Chart):
+    data: List[Tuple[str, int]]
+    title: str
+
+    def set_data(self, *data):
+        self.data = list(data)
+        return self
+
+    def set_title(self, title: str):
+        self.title = title
+        return self
+
+    def make(self):
+        wordcloud = ecWordCloud(init_opts=opts.InitOpts(bg_color="#FFFFFF")) \
+            .add("", data_pair=self.data, word_size_range=[6, 66]) \
+            .set_global_opts(title_opts=opts.TitleOpts(title=self.title))
+        return self.render(wordcloud)

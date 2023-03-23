@@ -22,13 +22,13 @@ graia-saya = "^0.0.17"
 bili-danmu = "^0.2.3"
 beanie = "^1.17.0"
 tinydb = "^4.7.1"
-matplotlib = "^3.7.1"
-seaborn = "^0.12.2"
 jieba = "^0.42.1"
-wordcloud = "^1.8.2.2"
 telegraph = {extras = ["aio"], version = "^2.2.0"}
 jinja2 = "^3.1.2"
 python-telegram-bot = "^20.1"
+pyecharts = "^2.0.2"
+snapshot-selenium = "^0.0.2"
+
 
 
 [tool.poetry.group.dev.dependencies]
