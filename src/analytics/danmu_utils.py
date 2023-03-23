@@ -68,6 +68,15 @@ class DanmuUtils:
     def get_danmu_msg(self):
         return self.db.search(self.danmu_query.type == DB_Types.DanmuMsg)
 
+    def get_interact_danmus(self):
+        return self.db.search(self.danmu_query.type.one_of(self.interact_types))
+
+    def get_medals(self):
+        return list(set([i["medal"]["name"] for i in self.db.search(self.danmu_query.medal != None) if i["medal"]["name"] != ""]))
+
+    def count_medal_interacts(self, medal_name):
+        return self.db.count((self.danmu_query.medal != None) & (self.danmu_query.medal.name == medal_name))
+
     def segment_danmu_text(self, words: list, ignore_words: list, stop_words: list):
         for i in words:
             jieba.suggest_freq(i, tune=True)

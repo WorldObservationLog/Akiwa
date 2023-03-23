@@ -67,5 +67,12 @@ stop_words = ["———", "》），", "）÷（１－", "”，", "）、", "�
 [platform]
 name = ["telegraph"]
 
-[platform.telegraph]
+[[platform.config]]
+name = "telegraph"
 template = "telegraph.jinja2"
+post_platform = { name="telegram", data={bot_token = "", target = ""}}
+
+[[platform.config]]
+name = "bilibili"
+template = "bilibili.jinja2"
+data = {"bili_jct"="", "sessdata"="", "buvid3"="", "deaduserid"=""}

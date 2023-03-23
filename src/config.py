@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import tomli
 from creart import exists_module
@@ -25,7 +25,8 @@ class PostPlatform(BaseModel):
 class PlatformConfig(BaseModel):
     name: str
     template: str
-    post_platform: PostPlatform
+    data: Optional[dict]
+    post_platform: Optional[PostPlatform]
 
 
 class Platform(BaseModel):

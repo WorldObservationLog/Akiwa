@@ -1,5 +1,4 @@
-import io
-import sys
+import math
 from datetime import datetime
 from typing import List
 from zoneinfo import ZoneInfo
@@ -7,32 +6,29 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 from creart import it
 from graia.broadcast import Broadcast
-from matplotlib.font_manager import fontManager
-from wordcloud import wordcloud
 from jinja2 import Environment, FileSystemLoader
 
-from src.analytics.chart import Histogram, HistogramData, PieData, Pie
+from src.analytics.chart import Histogram, HistogramData, PieData, Pie, WordCloud
 from src.analytics.danmu_utils import DanmuUtils
 from src.analytics.platforms import PLATFORM_MATCHES, Platform
 from src.analytics.post_platform import POST_PLATFORM_MATCHES
 from src.config import Config, ConfigModel
 from src.database.models import DB_Types, Live, Danmu
 
-
 jinja = Environment(loader=FileSystemLoader("templates"))
 
 
 class Report:
     data: dict = {}
-    live_title: str
     date: str
+    live: Live
 
     def set_data(self, **kwargs):
         self.data.update(kwargs)
         return self
 
-    def set_title(self, title: str):
-        self.live_title = title
+    def set_live(self, live: Live):
+        self.live = live
         return self
 
     def upload_images(self, platform: Platform):
@@ -40,12 +36,12 @@ class Report:
             self.data[i] = platform.upload_image(img=j)
 
     def post_report(self, platform: str):
-        self.date = datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%m-%d")
+        self.date = datetime.fromtimestamp(self.live.start_time).strftime("%m-%d")
         platform_obj = PLATFORM_MATCHES[platform]()
         self.upload_images(platform_obj)
         template = jinja.get_template(name=it(Config).config.platform.find_platform_config(platform).template)
         report = template.render(report=self, platform=platform_obj)
-        return platform_obj.send_report(report, title=f"{self.live_title} { self.date }直播数据统计报告")
+        return platform_obj.send_report(report, title=f"{self.live.title} {self.date}直播数据统计报告")
 
 
 class Analysis:
@@ -84,7 +80,7 @@ class Analysis:
             HistogramData(name="人均弹幕条数", value=per_danmu_times_of_interact, category="参与互动的观众"),
             HistogramData(name="人均弹幕条数", value=per_danmu_times, category="所有观众")) \
             .set_title("参与互动及未参与互动观众对比") \
-            .make_histogram()
+            .make()
         return audience_compare
 
     def generate_medal_compare(self):
@@ -97,7 +93,7 @@ class Analysis:
             results.append(HistogramData(name=levels[i], value=audiences, category="观众数量"))
             results.append(HistogramData(name=levels[i], value=danmus, category="弹幕数量"))
             results.append(HistogramData(name=levels[i], value=interacts, category="互动数量"))
-        medal_compare = Histogram().set_data(*results).set_title("观众及粉丝团数据").make_histogram()
+        medal_compare = Histogram().set_data(*results).set_title("观众及粉丝团数据").make()
         return medal_compare
 
     def generate_word_frequency(self):
@@ -108,7 +104,7 @@ class Analysis:
         frequency = series.value_counts()
         chart_data = [HistogramData(name=str(name), value=value, category="") for name, value in
                       frequency.iloc[:15].items()]
-        word_frequency = Histogram().set_data(*chart_data).set_title("词频统计").make_histogram(orient="h")
+        word_frequency = Histogram().set_data(*chart_data).set_title("词频统计").make(orient="h")
         return word_frequency
 
     def generate_wordcloud(self):
@@ -117,20 +113,11 @@ class Analysis:
                                            self.config.jieba.stop_words)
         series = pd.Series(words)
         frequency = series.value_counts()
-        frequency_data = {}
+        frequency_data = []
         for name, value in frequency.iloc[:300].items():
-            frequency_data.update({str(name): value})
-        if sys.platform == "win32":
-            font_name = "SimHei"
-        elif sys.platform == "linux":
-            font_name = "Droid Sans Fallback"
-        else:
-            font_name = "Arial"
-        font = fontManager.findfont(font_name)
-        wc = wordcloud.WordCloud(font_path=font).generate_from_frequencies(frequency_data)
-        img = io.BytesIO()
-        wc.to_image().save(img, format="png")
-        return img.getvalue()
+            frequency_data.append((str(name), value))
+        wordcloud = WordCloud().set_data(*frequency_data).set_title("弹幕词云").make()
+        return wordcloud
 
     def generate_revenue_scale(self):
         revenues = {(0, 10): "≤10", (10, 100): "10-100", (100, 1e10): "≥100"}
@@ -138,7 +125,7 @@ class Analysis:
         for i in revenues.keys():
             revenue = self.du.sum_earning(None, i)
             results.append(PieData(name=revenues[i], value=revenue))
-        revenue_scale = Pie().set_title("营收金额构成").set_data(*results).make_pie()
+        revenue_scale = Pie().set_title("营收金额构成").set_data(*results).make()
         return revenue_scale
 
     def generate_revenue_type_scale(self):
@@ -147,8 +134,24 @@ class Analysis:
         for i in revenue_types.keys():
             r_type = self.du.sum_earning(i)
             results.append(PieData(name=revenue_types[i], value=r_type))
-        revenue_type_scale = Pie().set_title("营收类型构成").set_data(*results).make_pie()
+        revenue_type_scale = Pie().set_title("营收类型构成").set_data(*results).make()
         return revenue_type_scale
+
+    def generate_medal_scale(self):
+        interact_count = self.du.count_interacts()
+        interact_medals = [i["medal"]["name"] if i["medal"] is not None and i["medal"]["name"] != "" else "无粉丝团" for
+                           i in self.du.get_interact_danmus()]
+        results = {"其他": 0.0}
+        danmu_series = pd.Series(interact_medals)
+        for i, j in danmu_series.value_counts().items():
+            percent = j / interact_count
+            if percent <= 0.05:
+                results["其他"] = math.fsum([results["其他"], j])
+            else:
+                results.update({i: j})
+        medal_scale_data = [PieData(name=i, value=j) for i, j in results.items()]
+        medal_scale = Pie().set_title("粉丝团互动比例").set_data(*medal_scale_data).make()
+        return medal_scale
 
     def post_report(self):
         audience_compare = self.generate_audience_compare()
@@ -157,17 +160,21 @@ class Analysis:
         word_cloud = self.generate_wordcloud()
         revenue_scale = self.generate_revenue_scale()
         revenue_type_scale = self.generate_revenue_type_scale()
+        medal_scale = self.generate_medal_scale()
         report = Report().set_data(audience_compare=audience_compare,
                                    medal_compare=medal_compare,
                                    word_frequency=word_frequency,
                                    word_cloud=word_cloud,
                                    revenue_scale=revenue_scale,
-                                   revenue_type_scale=revenue_type_scale) \
-            .set_title(self.live.title)
+                                   revenue_type_scale=revenue_type_scale,
+                                   medal_scale=medal_scale) \
+            .set_live(self.live)
         for i in self.config.platform.name:
             report_url = report.post_report(i)
             post_platform_config = self.config.platform.find_platform_config(i).post_platform
-            post_platform = POST_PLATFORM_MATCHES.get(post_platform_config.name)
-            if post_platform:
-                post_platform_obj = post_platform(bot_token=post_platform_config.data["bot_token"], loop=it(Broadcast).loop)
-                post_platform_obj.post_report(post_platform_config.data["target"], report_url)
+            if post_platform_config:
+                post_platform = POST_PLATFORM_MATCHES.get(post_platform_config.name)
+                if post_platform:
+                    post_platform_obj = post_platform(bot_token=post_platform_config.data["bot_token"],
+                                                      loop=it(Broadcast).loop)
+                    post_platform_obj.post_report(post_platform_config.data["target"], report_url)
