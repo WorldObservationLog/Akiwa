@@ -26,7 +26,7 @@ class Telegraph(Platform):
 
     def __init__(self):
         self.telegraph = Tel()
-        self.telegraph.create_account("EOEDataGroup", "EOE数据组")
+        self.telegraph.create_account("Akiwa")
 
     def upload_image(self, img: bytes) -> str:
         tmp_img = tempfile.NamedTemporaryFile(mode='wb', delete=False)
