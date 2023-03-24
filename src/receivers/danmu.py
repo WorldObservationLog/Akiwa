@@ -19,13 +19,13 @@ config = it(Config).config
 
 @channel.use(ListenerSchema(listening_events=[DanmuReceivedEvent]))
 async def danmu_receiver(event: DanmuReceivedEvent):
-    logger.info(f"Received Danmu {event.command} from room {event.room_id}")
+    logger.debug(f"Received Danmu {event.command} from room {event.room_id}")
     await db.add_danmu(event)
 
 
 @channel.use(ListenerSchema(listening_events=[HeartbeatReceivedEvent]))
 async def heartbeat_receiver(event: HeartbeatReceivedEvent):
-    logger.info(f"Received Heartbeat from room {event.room_id}, watching: {event.watching}")
+    logger.debug(f"Received Heartbeat from room {event.room_id}, watching: {event.watching}")
     if event.watching > 1:
         await db.add_heartbeat(event)
 

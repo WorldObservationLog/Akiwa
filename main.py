@@ -1,11 +1,16 @@
+import sys
 import time
 
 from creart import create, it, add_creator
 from graia.broadcast import Broadcast
 from graia.saya import Saya
+from loguru import logger
 
 from src.config import Config, ConfigCreator
 from src.events import CollectorStartEvent
+
+logger.remove()
+logger.add(sys.stderr, level="INFO")
 
 add_creator(ConfigCreator)
 create(Config)
