@@ -88,12 +88,20 @@ class Histogram(Chart):
         return self
 
     def make(self, orient: Literal["v", "h"] = "v"):
-        histogram = Bar(init_opts=opts.InitOpts(bg_color="#FFFFFF")) \
-            .add_xaxis(list(set([i.name for i in self.data]))) \
-            .set_global_opts(title_opts=opts.TitleOpts(title=self.title))
+        histogram_data = {}
         for j in list(set([i.category for i in self.data])):
-            values = [i.value for i in self.data if i.category == j]
-            histogram = histogram.add_yaxis(j, values)
+            values = [i for i in self.data if i.category == j]
+            histogram_data.update({j: values})
+        xaxis_data = list(set([i.name for i in self.data]))
+        xaxis_data.sort(key=[i.name for i in self.data].index)
+        histogram = Bar(init_opts=opts.InitOpts(bg_color="#FFFFFF")) \
+            .add_xaxis(xaxis_data) \
+            .set_global_opts(title_opts=opts.TitleOpts(title=self.title))
+        for i, j in histogram_data.items():
+            histogram = histogram.add_yaxis(i, [opts.BarItem(name=k.name, value=k.value) for k in j])
+        # for j in list(set([i.category for i in self.data])):
+        #    values = [i.value for i in self.data if i.category == j]
+        #    histogram = histogram.add_yaxis(j, values)
         if orient == "h":
             histogram = histogram.reversal_axis().set_series_opts(label_opts=opts.LabelOpts(position="right"))
         return self.render(histogram)
