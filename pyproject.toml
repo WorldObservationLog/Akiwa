@@ -28,6 +28,7 @@ jinja2 = "^3.1.2"
 python-telegram-bot = "^20.1"
 pyecharts = "^2.0.2"
 snapshot-selenium = "^0.0.2"
+pandas = "^1.5.3"
 
 
 
