@@ -1,6 +1,7 @@
 import tempfile
 from typing import List, Literal, Tuple
 from pathlib import Path
+import uuid
 
 from pyecharts.globals import SymbolType
 from pyecharts.render import make_snapshot
@@ -8,11 +9,9 @@ from pyecharts.charts import Pie as ecPie
 from pyecharts.charts import WordCloud as ecWordCloud
 from pyecharts.charts import Bar
 from pyecharts import options as opts
-from snapshot_selenium import snapshot
-import uuid
-
 from pydantic import BaseModel
 
+import .snapshot
 
 class Chart:
     def set_title(self, title: str):
