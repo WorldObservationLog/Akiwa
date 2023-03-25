@@ -11,7 +11,8 @@ from pyecharts.charts import Bar
 from pyecharts import options as opts
 from pydantic import BaseModel
 
-import src.analytics.snapshot
+from src.analytics import snapshot
+
 
 class Chart:
     def set_title(self, title: str):
