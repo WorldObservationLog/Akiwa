@@ -12,7 +12,9 @@ DB_TYPE_COMMAND_MAPPING = {Commands.INTERACT_WORD: DB_Types.Entry,
                            Commands.SEND_GIFT: DB_Types.Gift,
                            Commands.COMBO_SEND: DB_Types.Gift,
                            Commands.SUPER_CHAT_MESSAGE: DB_Types.SuperChat,
-                           Commands.GUARD_BUY: DB_Types.Guard
+                           Commands.GUARD_BUY: DB_Types.Guard,
+                           Commands.LIVE: DB_Types.StartLive,
+                           Commands.PREPARING: DB_Types.EndLive
                            }
 
 
