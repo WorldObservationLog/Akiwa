@@ -1,7 +1,6 @@
 import math
 from datetime import datetime
 from typing import List
-from zoneinfo import ZoneInfo
 
 import pandas as pd
 from creart import it

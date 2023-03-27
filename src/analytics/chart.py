@@ -1,15 +1,14 @@
 import tempfile
-from typing import List, Literal, Tuple
-from pathlib import Path
 import uuid
+from pathlib import Path
+from typing import List, Literal, Tuple
 
-from pyecharts.globals import SymbolType
-from pyecharts.render import make_snapshot
+from pydantic import BaseModel
+from pyecharts import options as opts
+from pyecharts.charts import Bar
 from pyecharts.charts import Pie as ecPie
 from pyecharts.charts import WordCloud as ecWordCloud
-from pyecharts.charts import Bar
-from pyecharts import options as opts
-from pydantic import BaseModel
+from pyecharts.render import make_snapshot
 
 from src.analytics import snapshot
 

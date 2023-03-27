@@ -1,8 +1,8 @@
 from beanie import init_beanie
+from bilibili_api.live import LiveRoom
 from creart import it, AbstractCreator, CreateTargetInfo, exists_module
 from graia.broadcast import Broadcast
 from motor.motor_asyncio import AsyncIOMotorClient
-from bilibili_api.live import LiveRoom
 
 from src.config import Config
 from src.events import DanmuReceivedEvent, HeartbeatReceivedEvent

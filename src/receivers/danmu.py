@@ -5,11 +5,11 @@ from graia.saya import Saya, Channel
 from graia.saya.builtins.broadcast.behaviour import ListenerSchema
 from loguru import logger
 
+from src.analytics.analysis import Analysis
 from src.config import Config
 from src.database.database import Database
-from src.events import DanmuReceivedEvent, HeartbeatReceivedEvent, LiveEndEvent, LiveStartEvent
 from src.database.models import Live
-from src.analytics.analysis import Analysis
+from src.events import DanmuReceivedEvent, HeartbeatReceivedEvent, LiveEndEvent, LiveStartEvent
 
 saya = Saya.current()
 channel = Channel.current()

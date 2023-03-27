@@ -2,8 +2,8 @@
 # Add some argument to adapt linux
 
 import os
-import time
 import platform
+import time
 from typing import Any
 
 from selenium import webdriver

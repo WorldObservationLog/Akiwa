@@ -59,9 +59,12 @@ class DanmuUtils:
 
     def sum_earning(self, gift_type: Literal[DB_Types.Gift, DB_Types.Guard, DB_Types.SuperChat, None] = None,
                     gift_price: Tuple[int, int] = None):
-        gift_type_query = self.danmu_query.type.one_of(self.valuable_types) if not gift_type else self.danmu_query.type == gift_type
-        gift_price_query = self.danmu_query.room_id.exists() if not gift_price else (self.danmu_query.data.price >= gift_price[0]) & (
-                    self.danmu_query.data.price <= gift_price[1])
+        gift_type_query = self.danmu_query.type.one_of(
+            self.valuable_types) if not gift_type else self.danmu_query.type == gift_type
+        gift_price_query = self.danmu_query.room_id.exists() if not gift_price else (self.danmu_query.data.price >=
+                                                                                     gift_price[0]) & (
+                                                                                            self.danmu_query.data.price <=
+                                                                                            gift_price[1])
         valuable_danmus = self.db.search(gift_price_query & gift_type_query)
         return math.fsum(i["data"]["price"] for i in valuable_danmus)
 
@@ -72,7 +75,8 @@ class DanmuUtils:
         return self.db.search(self.danmu_query.type.one_of(self.interact_types))
 
     def get_medals(self):
-        return list(set([i["medal"]["name"] for i in self.db.search(self.danmu_query.medal != None) if i["medal"]["name"] != ""]))
+        return list(set([i["medal"]["name"] for i in self.db.search(self.danmu_query.medal != None) if
+                         i["medal"]["name"] != ""]))
 
     def count_medal_interacts(self, medal_name):
         return self.db.count((self.danmu_query.medal != None) & (self.danmu_query.medal.name == medal_name))
@@ -82,7 +86,8 @@ class DanmuUtils:
             jieba.suggest_freq(i, tune=True)
         result = []
         danmu_texts = [i["data"]["text"].upper() for i in self.get_danmu_msg()]
-        filtered_danmu_texts = list(filter(lambda a: a not in ignore_words or (a.startswith("[") and a.endswith("]")), danmu_texts))
+        filtered_danmu_texts = list(
+            filter(lambda a: a not in ignore_words or (a.startswith("[") and a.endswith("]")), danmu_texts))
         for i in filtered_danmu_texts:
             result.extend(jieba.lcut(i))
         filtered_result = list(filter(lambda a: a not in stop_words, result))
