@@ -119,11 +119,13 @@ class Bilibili(Platform):
 
     def send_report(self, report: str, title: str) -> str:
         endpoint = "https://api.bilibili.com/x/article/creative/article/submit"
+        config = it(Config).config.platform.find_platform_config("bilibili").data
         resp = httpx.post(endpoint,
                           data=PostArticleModel(title=title, content=report, summary="Akiwa Live Report", words=100,
                                                 tid=4,
                                                 aid=self.get_aid(), csrf=self.user.bili_jct,
-                                                build=self.user.buvid3).dict(),
+                                                build=self.user.buvid3,
+                                                tags=config["tags"]).dict(),
                           cookies=self.user.get_cookies()).json()
         return ""
 
