@@ -7,6 +7,8 @@ import platform
 from typing import Any
 
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
+from tenacity import retry, retry_if_exception_type, stop_after_attempt
 
 SNAPSHOT_JS = """
     var ele = document.querySelector('div[_echarts_instance_]');
@@ -24,13 +26,14 @@ SNAPSHOT_SVG_JS = """
 """
 
 
+@retry(retry=retry_if_exception_type(WebDriverException), stop=stop_after_attempt(3))
 def make_snapshot(
-    html_path: str,
-    file_type: str,
-    pixel_ratio: int = 2,
-    delay: int = 2,
-    browser="Chrome",
-    driver: Any = None,
+        html_path: str,
+        file_type: str,
+        pixel_ratio: int = 2,
+        delay: int = 2,
+        browser="Chrome",
+        driver: Any = None,
 ):
     if delay < 0:
         raise Exception("Time travel is not possible")
