@@ -6,6 +6,7 @@ import pandas as pd
 from creart import it
 from graia.broadcast import Broadcast
 from jinja2 import Environment, FileSystemLoader
+from loguru import logger
 
 from src.analytics.chart import Histogram, HistogramData, PieData, Pie, WordCloud
 from src.analytics.danmu_utils import DanmuUtils
@@ -68,6 +69,7 @@ class Analysis:
             return self.du.count_danmus() / self.du.count_audience()
 
     def generate_audience_compare(self):
+        logger.info("Generating audience compare")
         per_interact_times = round(self.per_interact(), 2)
         per_interact_times_of_interact = round(self.per_interact(True), 2)
         per_danmu_times = round(self.per_danmus(), 2)
@@ -83,6 +85,7 @@ class Analysis:
         return audience_compare
 
     def generate_medal_compare(self):
+        logger.info("Generating medal compare")
         levels = {(0, 0): "非粉丝团", (1, 5): "1-5", (6, 10): "6-10", (11, 20): "11-20", (21, 40): "21-40"}
         results = []
         for i in levels.keys():
@@ -96,6 +99,7 @@ class Analysis:
         return medal_compare
 
     def generate_word_frequency(self):
+        logger.info("Generating word frequency")
         words = self.du.segment_danmu_text(self.config.jieba.words,
                                            self.config.jieba.ignore_words,
                                            self.config.jieba.stop_words)
@@ -107,6 +111,7 @@ class Analysis:
         return word_frequency
 
     def generate_wordcloud(self):
+        logger.info("Generating wordcloud")
         words = self.du.segment_danmu_text(self.config.jieba.words,
                                            self.config.jieba.ignore_words,
                                            self.config.jieba.stop_words)
@@ -119,6 +124,7 @@ class Analysis:
         return wordcloud
 
     def generate_revenue_scale(self):
+        logger.info("Generating revenue scale")
         revenues = {(0, 10): "≤10", (10, 100): "10-100", (100, 1e10): "≥100"}
         results = []
         for i in revenues.keys():
@@ -128,6 +134,7 @@ class Analysis:
         return revenue_scale
 
     def generate_revenue_type_scale(self):
+        logger.info("Generating revenue type scale")
         revenue_types = {DB_Types.SuperChat: "超级留言", DB_Types.Guard: "舰长", DB_Types.Gift: "礼物"}
         results = []
         for i in revenue_types.keys():
@@ -137,6 +144,7 @@ class Analysis:
         return revenue_type_scale
 
     def generate_medal_scale(self):
+        logger.info("Generating medal scale")
         interact_count = self.du.count_interacts()
         interact_medals = [i["medal"]["name"] if i["medal"] is not None and i["medal"]["name"] != "" else "无粉丝团" for
                            i in self.du.get_interact_danmus()]
@@ -169,10 +177,12 @@ class Analysis:
                                    medal_scale=medal_scale) \
             .set_live(self.live)
         for i in self.config.platform.name:
+            logger.info(f"Posting report to {i}")
             report_url = report.post_report(i)
             post_platform_config = self.config.platform.find_platform_config(i).post_platform
             if post_platform_config:
                 post_platform = POST_PLATFORM_MATCHES.get(post_platform_config.name)
+                logger.info(f"Posting report link to {post_platform_config.name}")
                 if post_platform:
                     post_platform_obj = post_platform(bot_token=post_platform_config.data["bot_token"],
                                                       loop=it(Broadcast).loop)
