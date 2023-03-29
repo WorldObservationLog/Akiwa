@@ -46,6 +46,7 @@ class ConfigModel(BaseModel):
     platform: Platform
     conn_str: str
     database_name: str
+    enable_local_assets: bool
     commands: List[str]
 
 

@@ -1,0 +1,3 @@
+[submodule "pyecharts-assets"]
+	path = pyecharts-assets
+	url = https://github.com/pyecharts/pyecharts-assets.git

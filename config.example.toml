@@ -1,6 +1,7 @@
 conn_str = ""
 database_name = ""
 commands = ["INTERACT_WORD", "ENTRY_EFFECT", "DANMU_MSG", "SEND_GIFT", "COMBO_SEND", "LIVE", "PREPARING", "SUPER_CHAT_MESSAGE", "GUARD_BUY", "DANMU_MSG:4:0:2:2:2:0"]
+enable_local_assets = false
 
 [listening]
 room = [25512465, 25512476, 25512485, 25512501, 25512443]
