@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from pyecharts import options as opts
 from pyecharts.charts import Bar
 from pyecharts.charts import Pie as ecPie
+from pyecharts.charts import Line as ecLine
 from pyecharts.charts import WordCloud as ecWordCloud
 from pyecharts.render import make_snapshot
 
@@ -123,3 +124,29 @@ class WordCloud(Chart):
             .add("", data_pair=self.data, word_size_range=[6, 66]) \
             .set_global_opts(title_opts=opts.TitleOpts(title=self.title))
         return self.render(wordcloud)
+
+class Line(Chart):
+    data: List[HistogramData]
+    title: str
+
+    def set_data(self, *data):
+        self.data = list(data)
+        return self
+
+    def set_title(self, title: str):
+        self.title = title
+        return self
+
+    def make(self):
+        line_data = {}
+        for j in list(set([i.category for i in self.data])):
+            values = [i for i in self.data if i.category == j]
+            line_data.update({j: values})
+        xaxis_data = list(set([i.name for i in self.data]))
+        xaxis_data.sort(key=[i.name for i in self.data].index)
+        line = ecLine(init_opts=opts.InitOpts(bg_color="#FFFFFF")) \
+            .add_xaxis(xaxis_data) \
+            .set_global_opts(title_opts=opts.TitleOpts(title=self.title))
+        for i, j in line_data .items():
+            line = line.add_yaxis(i, [opts.BarItem(name=k.name, value=k.value) for k in j])
+        return self.render(line)

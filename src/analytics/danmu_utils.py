@@ -38,6 +38,9 @@ class DanmuUtils:
         else:
             return list(set([i["uid"] for i in self.db.all()]))
 
+    def get_valuable_danmus(self):
+        return self.db.search(self.danmu_query.type.one_of(self.valuable_types))
+
     def get_interact_audiences(self):
         return list(set([i["uid"] for i in
                          self.db.search(self.danmu_query.type.one_of(self.interact_types))]))

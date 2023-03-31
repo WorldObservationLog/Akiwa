@@ -8,7 +8,7 @@ from graia.broadcast import Broadcast
 from jinja2 import Environment, FileSystemLoader
 from loguru import logger
 
-from src.analytics.chart import Histogram, HistogramData, PieData, Pie, WordCloud
+from src.analytics.chart import Histogram, HistogramData, PieData, Pie, WordCloud, Line
 from src.analytics.danmu_utils import DanmuUtils
 from src.analytics.platforms import PLATFORM_MATCHES, Platform
 from src.analytics.post_platform import POST_PLATFORM_MATCHES
@@ -56,6 +56,7 @@ class Analysis:
         self.du = DanmuUtils()
         self.du.create(danmus, live.room_id)
 
+
     def per_interact(self, interacted=False):
         if interacted:
             return self.du.count_interacts() / self.du.count_interact_audiences()
@@ -67,6 +68,16 @@ class Analysis:
             return self.du.count_danmus() / self.du.count_interact_audiences()
         else:
             return self.du.count_danmus() / self.du.count_audience()
+
+    def convent_to_timing_data(self, start_time: int, data: list):
+        for i in data:
+            i[0] = round((i[0] - start_time) / 60)
+        pd_data = pd.DataFrame(data, columns=["timestamp", "value"], dtype=pd.Float64Dtype)
+        results = []
+        for i in list(set(pd_data["timestamp"])):
+            results.append([i, pd_data[pd_data["timestamp"] == i].sum()["value"]])
+        results.sort(key=lambda x: x[0])
+        return results
 
     def generate_audience_compare(self):
         logger.info("Generating audience compare")
@@ -159,6 +170,15 @@ class Analysis:
         medal_scale_data = [PieData(name=i, value=j) for i, j in results.items()]
         medal_scale = Pie().set_title("粉丝团互动比例").set_data(*medal_scale_data).make()
         return medal_scale
+
+    def generate_earning_timing(self):
+        logger.info("Generating earning timing")
+        earning_danmus = self.du.get_valuable_danmus()
+        pre_timing_data = [[i["timestamp"], i["data"]["price"]] for i in earning_danmus]
+        timing_data = self.convent_to_timing_data(self.live.start_time, pre_timing_data)
+        chart_data = [HistogramData(name=i[0], value=i[1], category="") for i in timing_data]
+        earning_timing = Line().set_title("时序营收图").set_data(*chart_data).make()
+        return earning_timing
 
     def post_report(self):
         audience_compare = self.generate_audience_compare()
