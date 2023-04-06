@@ -38,7 +38,7 @@ async def run_snapshot(
     if remote_address is not None:
         browser = await connect({"browserWSEndpoint": kwargs.get("remoteAddress")})
     else:
-        browser = await launch({"headless": True, "--no-sandbox": True, "--disable-dev-shm-usage": True, "--disable-gpu": True})
+        browser = await launch({"headless": True, "args": ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]})
 
     # Init and config code
     page = await browser.newPage()
