@@ -1,73 +1,79 @@
-# https://github.com/pyecharts/snapshot-selenium/blob/dev/snapshot_selenium/snapshot.py
+# https://github.com/pyecharts/snapshot-pyppeteer/blob/master/snapshot_pyppeteer/snapshot.py
 # Add some argument to adapt linux
 
 import os
-import platform
-import time
+import asyncio
 from typing import Any
 
-from selenium import webdriver
-from selenium.common.exceptions import WebDriverException
-from tenacity import retry, retry_if_exception_type, stop_after_attempt
+from pyppeteer import launch, connect
 
-SNAPSHOT_JS = """
-    var ele = document.querySelector('div[_echarts_instance_]');
-    var mychart = echarts.getInstanceByDom(ele);
-    return mychart.getDataURL({
-        type: '%s',
-        pixelRatio: %s,
-         excludeComponents: ['toolbox']
-    });
-"""
+SNAPSHOT_JS = (
+    "echarts.getInstanceByDom(document.querySelector('div[_echarts_instance_]'))."
+    "getDataURL({type: '%s', pixelRatio: %s, excludeComponents: ['toolbox']})"
+)
 
-SNAPSHOT_SVG_JS = """
-   var element = document.querySelector('div[_echarts_instance_] div');
-   return element.innerHTML;
-"""
+SNAPSHOT_SVG_JS = "document.querySelector('div[_echarts_instance_] div').innerHTML"
 
 
-@retry(retry=retry_if_exception_type(WebDriverException), stop=stop_after_attempt(3))
-def make_snapshot(
-        html_path: str,
-        file_type: str,
-        pixel_ratio: int = 2,
-        delay: int = 2,
-        browser="Chrome",
-        driver: Any = None,
-):
-    if delay < 0:
-        raise Exception("Time travel is not possible")
-    if not driver:
-        if browser == "Chrome":
-            driver = get_chrome_driver()
-        elif browser == "Safari":
-            driver = get_safari_driver()
-        else:
-            raise Exception("Unknown browser!")
+async def run_snapshot(
+    html_path: str,
+    file_type: str,
+    pixel_ratio: int = 2,
+    delay: int = 2,
+    **kwargs
+) -> Any:
+    # You can load remote html file or local file
+    if not html_path.startswith("http"):
+        html_path = "file://" + os.path.abspath(html_path)
 
+    # You can use browserless by docker(chrome browser)
+    """
+    $ docker pull browserless/chrome:latest
+    $ docker run -d -p 3000:3000 --shm-size 2gb --name browserless --restart always \
+      -e "DEBUG=browserless/chrome" -e "MAX_CONCURRENT_SESSIONS=10" \
+      browserless/chrome:latest
+    # the args `remoteAddress` is "ws://<server IP>:3000"
+    """
+    remote_address = kwargs.get("remoteAddress")
+    if remote_address is not None:
+        browser = await connect({"browserWSEndpoint": kwargs.get("remoteAddress")})
+    else:
+        browser = await launch({"headless": True, "--no-sandbox": True, "--disable-dev-shm-usage": True, "--disable-gpu": True})
+
+    # Init and config code
+    page = await browser.newPage()
+    await page.setJavaScriptEnabled(enabled=True)
+    await page.goto(html_path)
+    await asyncio.sleep(delay)
+
+    # Generate js function
     if file_type == "svg":
         snapshot_js = SNAPSHOT_SVG_JS
     else:
         snapshot_js = SNAPSHOT_JS % (file_type, pixel_ratio)
 
-    if not html_path.startswith("http"):
-        html_path = "file://" + os.path.abspath(html_path)
+    # execute js function
+    execute_js_result = await page.evaluate(snapshot_js)
 
-    driver.get(html_path)
-    time.sleep(delay)
-
-    return driver.execute_script(snapshot_js)
-
-
-def get_chrome_driver():
-    options = webdriver.ChromeOptions()
-    options.add_argument("headless")
-    if platform.system() == "Linux":
-        options.add_argument('--no-sandbox')
-        options.add_argument('--disable-dev-shm-usage')
-        options.add_argument('--disable-gpu')
-    return webdriver.Chrome(options=options)
+    # disconnect or close the browser session
+    if remote_address is not None:
+        await browser.disconnect()
+    else:
+        await browser.close()
+    return execute_js_result
 
 
-def get_safari_driver():
-    return webdriver.Safari()
+def make_snapshot(
+    html_path: str, file_type: str, pixel_ratio: int = 2, delay: int = 2, **kwargs
+) -> Any:
+    snapshot_result = asyncio.get_event_loop().run_until_complete(
+        run_snapshot(
+            html_path=html_path,
+            file_type=file_type,
+            pixel_ratio=pixel_ratio,
+            delay=delay,
+            **kwargs
+        )
+    )
+    return snapshot_result
+

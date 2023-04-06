@@ -21,6 +21,9 @@ from src.database.database import Database, DatabaseCreator
 add_creator(DatabaseCreator)
 create(Database)
 
+import nest_asyncio
+nest_asyncio.apply()
+
 with saya.module_context():
     saya.require("src.collectors.danmu")
     saya.require("src.receivers.danmu")
