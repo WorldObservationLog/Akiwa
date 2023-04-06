@@ -129,7 +129,7 @@ class Analysis:
         series = pd.Series(words)
         frequency = series.value_counts()
         frequency_data = []
-        for name, value in frequency.iloc[:300].items():
+        for name, value in frequency.iloc[:100].items():
             frequency_data.append((str(name), value))
         wordcloud = WordCloud().set_data(*frequency_data).set_title("弹幕词云").make()
         return wordcloud
