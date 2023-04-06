@@ -43,7 +43,7 @@ async def run_snapshot(
     # Init and config code
     page = await browser.newPage()
     await page.setJavaScriptEnabled(enabled=True)
-    await page.goto(html_path)
+    await page.goto(html_path, {"waitUntil": "load", "timeout": 0})
     await asyncio.sleep(delay)
 
     # Generate js function
