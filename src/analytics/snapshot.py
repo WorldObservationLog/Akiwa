@@ -6,6 +6,8 @@ import asyncio
 from typing import Any
 
 from pyppeteer import launch, connect
+from creart import it
+from graia.broadcast import Broadcast
 
 SNAPSHOT_JS = (
     "echarts.getInstanceByDom(document.querySelector('div[_echarts_instance_]'))."
@@ -66,7 +68,7 @@ async def run_snapshot(
 def make_snapshot(
     html_path: str, file_type: str, pixel_ratio: int = 2, delay: int = 2, **kwargs
 ) -> Any:
-    snapshot_result = asyncio.get_event_loop().run_until_complete(
+    snapshot_result = it(Broadcast).loop.run_until_complete(
         run_snapshot(
             html_path=html_path,
             file_type=file_type,
