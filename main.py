@@ -22,7 +22,7 @@ add_creator(DatabaseCreator)
 create(Database)
 
 import nest_asyncio
-nest_asyncio.apply()
+nest_asyncio.apply(it(Broadcast).loop)
 
 with saya.module_context():
     saya.require("src.collectors.danmu")
