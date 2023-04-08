@@ -1,81 +1,99 @@
-# https://github.com/pyecharts/snapshot-pyppeteer/blob/master/snapshot_pyppeteer/snapshot.py
-# Add some argument to adapt linux
-
+import base64
+import codecs
+import loguru
 import os
-import asyncio
-from typing import Any
+from io import BytesIO
 
-from pyppeteer import launch, connect
-from creart import it
-from graia.broadcast import Broadcast
+from ..types import Any
 
-SNAPSHOT_JS = (
-    "echarts.getInstanceByDom(document.querySelector('div[_echarts_instance_]'))."
-    "getDataURL({type: '%s', pixelRatio: %s, excludeComponents: ['toolbox']})"
-)
+logger = loguru.logger
 
-SNAPSHOT_SVG_JS = "document.querySelector('div[_echarts_instance_] div').innerHTML"
+PNG_FORMAT = "png"
+JPG_FORMAT = "jpeg"
+GIF_FORMAT = "gif"
+PDF_FORMAT = "pdf"
+SVG_FORMAT = "svg"
+EPS_FORMAT = "eps"
+B64_FORMAT = "base64"
 
 
-async def run_snapshot(
-    html_path: str,
-    file_type: str,
+async def make_snapshot(
+    engine: Any,
+    file_name: str,
+    output_name: str,
+    delay: float = 2,
     pixel_ratio: int = 2,
-    delay: int = 2,
-    **kwargs
-) -> Any:
-    # You can load remote html file or local file
-    if not html_path.startswith("http"):
-        html_path = "file://" + os.path.abspath(html_path)
+    is_remove_html: bool = False,
+    **kwargs,
+):
+    logger.info("Generating file ...")
+    file_type = output_name.split(".")[-1]
 
-    # You can use browserless by docker(chrome browser)
-    """
-    $ docker pull browserless/chrome:latest
-    $ docker run -d -p 3000:3000 --shm-size 2gb --name browserless --restart always \
-      -e "DEBUG=browserless/chrome" -e "MAX_CONCURRENT_SESSIONS=10" \
-      browserless/chrome:latest
-    # the args `remoteAddress` is "ws://<server IP>:3000"
-    """
-    remote_address = kwargs.get("remoteAddress")
-    if remote_address is not None:
-        browser = await connect({"browserWSEndpoint": kwargs.get("remoteAddress")})
-    else:
-        browser = await launch({"headless": True, "handleSIGINT": False, "handleSIGTERM": False, "handleSIGHUP": False, "args": ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]})
-
-    # Init and config code
-    page = await browser.newPage()
-    await page.setJavaScriptEnabled(enabled=True)
-    await page.goto(html_path, {"waitUntil": "load", "timeout": 0})
-    await asyncio.sleep(delay)
-
-    # Generate js function
-    if file_type == "svg":
-        snapshot_js = SNAPSHOT_SVG_JS
-    else:
-        snapshot_js = SNAPSHOT_JS % (file_type, pixel_ratio)
-
-    # execute js function
-    execute_js_result = await page.evaluate(snapshot_js)
-
-    # disconnect or close the browser session
-    if remote_address is not None:
-        await browser.disconnect()
-    else:
-        await browser.close()
-    return execute_js_result
-
-
-def make_snapshot(
-    html_path: str, file_type: str, pixel_ratio: int = 2, delay: int = 2, **kwargs
-) -> Any:
-    snapshot_result = it(Broadcast).loop.run_until_complete(
-        run_snapshot(
-            html_path=html_path,
-            file_type=file_type,
-            pixel_ratio=pixel_ratio,
-            delay=delay,
-            **kwargs
-        )
+    content = await engine.make_snapshot(
+        html_path=file_name,
+        file_type=file_type,
+        delay=delay,
+        pixel_ratio=pixel_ratio,
+        **kwargs,
     )
-    return snapshot_result
+    if file_type in [SVG_FORMAT, B64_FORMAT]:
+        save_as_text(content, output_name)
+    else:
+        # pdf, gif, png, jpeg
+        content_array = content.split(",")
+        if len(content_array) != 2:
+            raise OSError(content_array)
 
+        image_data = decode_base64(content_array[1])
+
+        if file_type in [PDF_FORMAT, GIF_FORMAT, EPS_FORMAT]:
+            save_as(image_data, output_name, file_type)
+        elif file_type in [PNG_FORMAT, JPG_FORMAT]:
+            save_as_png(image_data, output_name)
+        else:
+            raise TypeError(f"Not supported file type '{file_type}'")
+
+    if "/" not in output_name:
+        output_name = os.path.join(os.getcwd(), output_name)
+
+    if is_remove_html and not file_name.startswith("http"):
+        os.unlink(file_name)
+    logger.info(f"File saved in {output_name}")
+
+
+def decode_base64(data: str) -> bytes:
+    """Decode base64, padding being optional.
+
+    :param data: Base64 data as an ASCII byte string
+    :returns: The decoded byte string.
+    """
+    missing_padding = len(data) % 4
+    if missing_padding != 0:
+        data += "=" * (4 - missing_padding)
+    return base64.decodebytes(data.encode("utf-8"))
+
+
+def save_as_png(image_data: bytes, output_name: str):
+    with open(output_name, "wb") as f:
+        f.write(image_data)
+
+
+def save_as_text(image_data: str, output_name: str):
+    with codecs.open(output_name, "w", encoding="utf-8") as f:
+        f.write(image_data)
+
+
+def save_as(image_data: bytes, output_name: str, file_type: str):
+    try:
+        from PIL import Image
+
+        m = Image.open(BytesIO(image_data))
+        m.load()
+        color = (255, 255, 255)
+        b = Image.new("RGB", m.size, color)
+        # BUG for Mac:
+        #   b.paste(m, mask=m.split()[3])
+        b.paste(m)
+        b.save(output_name, file_type, quality=100)
+    except ModuleNotFoundError:
+        raise Exception(f"Please install PIL for {file_type} image type")

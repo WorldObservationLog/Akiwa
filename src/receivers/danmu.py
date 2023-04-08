@@ -47,10 +47,6 @@ async def live_end_receiver(event: LiveEndEvent):
     live.end_time = event.timestamp
     await db.update_live(live)
     danmus = await db.get_danmu(live)
-
-    def generate_and_post_report():
-        ana = Analysis()
-        ana.init(live, danmus)
-        ana.post_report()
-
-    it(Broadcast).loop.run_in_executor(None, generate_and_post_report)
+    ana = Analysis()
+    ana.init(live, danmus)
+    await ana.post_report()
