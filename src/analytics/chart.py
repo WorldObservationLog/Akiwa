@@ -9,6 +9,7 @@ from pyecharts.charts import Bar
 from pyecharts.charts import Pie as ecPie
 from pyecharts.charts import Line as ecLine
 from pyecharts.charts import WordCloud as ecWordCloud
+from tenacity import retry_if_exception_type, stop_after_delay, stop_after_attempt, retry
 
 import src.analytics.engine as snapshot
 from src.analytics.snapshot import make_snapshot
@@ -24,6 +25,7 @@ class Chart:
     async def make(self):
         return NotImplemented
 
+    @retry(stop=(stop_after_attempt(3) | stop_after_delay(1800)), retry=retry_if_exception_type(AttributeError))
     async def render(self, chart_obj):
         temp_dir = tempfile.TemporaryDirectory()
         temp_html = str((Path(temp_dir.name) / Path(str(uuid.uuid4()) + ".html")).absolute())
