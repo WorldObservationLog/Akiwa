@@ -14,10 +14,10 @@ from src.config import Config
 
 class Platform:
 
-    def upload_image(self, img: bytes) -> str:
+    async def upload_image(self, img: bytes) -> str:
         raise NotImplemented
 
-    def send_report(self, report: str, title: str) -> str:
+    async def send_report(self, report: str, title: str) -> str:
         raise NotImplemented
 
 
@@ -28,7 +28,7 @@ class Telegraph(Platform):
         self.telegraph = Tel()
         self.telegraph.create_account("Akiwa")
 
-    def upload_image(self, img: bytes) -> str:
+    async def upload_image(self, img: bytes) -> str:
         tmp_img = tempfile.NamedTemporaryFile(mode='wb', delete=False)
         tmp_img.write(img)
         tmp_img.close()
@@ -36,7 +36,7 @@ class Telegraph(Platform):
         os.unlink(tmp_img.name)
         return resp[0]["src"]
 
-    def send_report(self, report: str, title: str) -> str:
+    async def send_report(self, report: str, title: str) -> str:
         resp = self.telegraph.create_page(title, html_content=report)
         return resp["url"]
 
@@ -111,13 +111,13 @@ class Bilibili(Platform):
         # 懒得转成模型了
         return resp["data"]["aid"]
 
-    def upload_image(self, img: bytes) -> str:
+    async def upload_image(self, img: bytes) -> str:
         endpoint = "https://api.bilibili.com/x/article/creative/article/upcover"
         resp = httpx.post(endpoint, data={"csrf": self.user.bili_jct}, files={"binary": BytesIO(img)},
                           cookies=self.user.get_cookies()).json()
         return resp["data"]["url"]
 
-    def send_report(self, report: str, title: str) -> str:
+    async def send_report(self, report: str, title: str) -> str:
         endpoint = "https://api.bilibili.com/x/article/creative/article/submit"
         config = it(Config).config.platform.find_platform_config("bilibili").data
         resp = httpx.post(endpoint,
