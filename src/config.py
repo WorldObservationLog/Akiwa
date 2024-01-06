@@ -17,33 +17,22 @@ class Jieba(BaseModel):
     stop_words: List[str]
 
 
-class PostPlatform(BaseModel):
-    name: str
-    data: dict
+class Account(BaseModel):
+    sessdata: str
+    bili_jct: str
+    buvid3: str
+    deaduserid: str
+    ac_time_value: str
 
-
-class PlatformConfig(BaseModel):
-    name: str
-    template: str
-    data: Optional[dict]
-    post_platform: Optional[PostPlatform]
-
-
-class Platform(BaseModel):
-    name: List[str]
-    config: List[PlatformConfig]
-
-    def find_platform_config(self, name: str):
-        for i in self.config:
-            if i.name == name:
-                return i
-        return None
+    def to_credential(self):
+        return Credential(sessdata=self.sessdata, bili_jct=self.bili_jct, buvid3=self.buvid3,
+                          dedeuserid=self.deaduserid, ac_time_value=self.ac_time_value)
 
 
 class ConfigModel(BaseModel):
     listening: Listening
     jieba: Jieba
-    platform: Platform
+    account: Account
     conn_str: str
     database_name: str
     enable_local_assets: bool
