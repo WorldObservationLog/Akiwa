@@ -1,5 +1,4 @@
 import math
-from datetime import datetime
 from typing import List
 
 import pandas as pd
@@ -9,38 +8,10 @@ from loguru import logger
 
 from src.analytics.chart import Histogram, HistogramData, PieData, Pie, WordCloud, Line
 from src.analytics.danmu_utils import DanmuUtils
-from src.analytics.platforms import PLATFORM_MATCHES, Platform
-from src.analytics.post_platform import POST_PLATFORM_MATCHES
 from src.config import Config, ConfigModel
 from src.database.models import DB_Types, Live, Danmu
 
 jinja = Environment(loader=FileSystemLoader("templates"))
-
-
-class Report:
-    data: dict = {}
-    date: str
-    live: Live
-
-    def set_data(self, **kwargs):
-        self.data.update(kwargs)
-        return self
-
-    def set_live(self, live: Live):
-        self.live = live
-        return self
-
-    async def upload_images(self, platform: Platform):
-        for i, j in self.data.copy().items():
-            self.data[i] = await platform.upload_image(img=j)
-
-    async def post_report(self, platform: str):
-        self.date = datetime.fromtimestamp(self.live.start_time).strftime("%m-%d")
-        platform_obj = PLATFORM_MATCHES[platform]()
-        await self.upload_images(platform_obj)
-        template = jinja.get_template(name=it(Config).config.platform.find_platform_config(platform).template)
-        report = template.render(report=self, platform=platform_obj)
-        return await platform_obj.send_report(report, title=f"{self.live.title} {self.date}直播数据统计报告")
 
 
 class Analysis:
@@ -185,30 +156,3 @@ class Analysis:
         earning_timing = Line().set_title("时序营收图").set_data(*chart_data)
         earning_timing = await earning_timing.make()
         return earning_timing
-
-    async def post_report(self):
-        audience_compare = await self.generate_audience_compare()
-        medal_compare = await self.generate_medal_compare()
-        word_frequency = await self.generate_word_frequency()
-        word_cloud = await self.generate_wordcloud()
-        revenue_scale = await self.generate_revenue_scale()
-        revenue_type_scale = await self.generate_revenue_type_scale()
-        medal_scale = await self.generate_medal_scale()
-        report = Report().set_data(audience_compare=audience_compare,
-                                   medal_compare=medal_compare,
-                                   word_frequency=word_frequency,
-                                   word_cloud=word_cloud,
-                                   revenue_scale=revenue_scale,
-                                   revenue_type_scale=revenue_type_scale,
-                                   medal_scale=medal_scale) \
-            .set_live(self.live)
-        for i in self.config.platform.name:
-            logger.info(f"Posting report to {i}")
-            report_url = await report.post_report(i)
-            post_platform_config = self.config.platform.find_platform_config(i).post_platform
-            if post_platform_config:
-                post_platform = POST_PLATFORM_MATCHES.get(post_platform_config.name)
-                logger.info(f"Posting report link to {post_platform_config.name}")
-                if post_platform:
-                    post_platform_obj = post_platform(bot_token=post_platform_config.data["bot_token"])
-                    await post_platform_obj.post_report(post_platform_config.data["target"], report_url)
