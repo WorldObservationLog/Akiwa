@@ -15,6 +15,8 @@ logger.add(sys.stderr, level="INFO")
 add_creator(ConfigCreator)
 create(Config)
 saya = create(Saya)
+loop = asyncio.get_event_loop()
+
 
 from src.database.database import Database, DatabaseCreator
 
@@ -39,11 +41,11 @@ if it(Config).config.enable_local_assets:
 
         handler = functools.partial(quietServer, directory="pyecharts-assets")
         httpd = HTTPServer(("0.0.0.0", 8000), handler)
-        it(Broadcast).loop.run_in_executor(None, httpd.serve_forever)
+        loop.run_in_executor(None, httpd.serve_forever)
         CurrentConfig.ONLINE_HOST = "http://127.0.0.1:8000/assets/"
     else:
         logger.error("The pyecharts-assets directory does not exists!")
 
 if __name__ == "__main__":
     it(Broadcast).postEvent(CollectorStartEvent(timestamp=int(time.time())))
-    it(Broadcast).loop.run_forever()
+    loop.run_forever()
