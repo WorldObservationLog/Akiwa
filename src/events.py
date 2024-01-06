@@ -17,11 +17,6 @@ class DanmuReceivedEvent(Event):
     data: dict
 
 
-class HeartbeatReceivedEvent(Event):
-    room_id: int
-    watching: int
-
-
 class CollectorStartEvent(Event):
     ...
 

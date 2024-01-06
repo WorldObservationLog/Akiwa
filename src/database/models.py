@@ -78,15 +78,6 @@ class Danmu(Document):
         return data
 
 
-class Heartbeat(Document):
-    room_id: int
-    timestamp: int
-    watching: int
-
-    class Settings:
-        name = "heartbeat"
-
-
 class Live(Document):
     room_id: int
     title: str

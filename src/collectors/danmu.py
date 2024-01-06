@@ -1,16 +1,15 @@
 import asyncio
-import struct
 import time
 
+from loguru import logger
 from bilibili_api.live import LiveDanmaku
 from creart import it
-from danmu import DanmuClient
 from graia.saya import Saya, Channel
 from graia.saya.builtins.broadcast.behaviour import ListenerSchema
 
 from src.collectors import bcc
 from src.config import Config
-from src.events import CollectorStartEvent, DanmuReceivedEvent, HeartbeatReceivedEvent, LiveStartEvent, LiveEndEvent
+from src.events import DanmuReceivedEvent, LiveStartEvent, LiveEndEvent
 from src.types import DANMU_MSG
 
 saya = Saya.current()

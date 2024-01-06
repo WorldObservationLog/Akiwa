@@ -1,3 +1,5 @@
+import asyncio
+
 from beanie import init_beanie
 from bilibili_api.live import LiveRoom
 from creart import it, AbstractCreator, CreateTargetInfo, exists_module
@@ -5,20 +7,21 @@ from graia.broadcast import Broadcast
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from src.config import Config
-from src.events import DanmuReceivedEvent, HeartbeatReceivedEvent
+from src.database.models import Danmu, Live
+from src.events import DanmuReceivedEvent
 from src.utils import convert_danmu
-from .models import Danmu, Heartbeat, Live
 
 config = it(Config).config
 bcc = it(Broadcast)
+loop = asyncio.get_event_loop()
 
 
 class Database:
     _client = AsyncIOMotorClient(config.conn_str)
 
     def __init__(self):
-        bcc.loop.run_until_complete(init_beanie(database=self._client[config.database_name],
-                                                document_models=[Danmu, Heartbeat, Live]))
+        loop.run_until_complete(init_beanie(database=self._client[config.database_name],
+                                            document_models=[Danmu, Live]))
 
     async def add_danmu(self, danmu: DanmuReceivedEvent):
         await convert_danmu(danmu).insert()
@@ -38,14 +41,6 @@ class Database:
 
     async def update_live(self, live: Live):
         await live.replace()
-
-    async def add_heartbeat(self, heartbeat: HeartbeatReceivedEvent):
-        await Heartbeat.parse_obj(heartbeat.dict()).insert()
-
-    async def get_heartbeat(self, live: Live):
-        return await Heartbeat.find_many(Heartbeat.room_id == live.room_id,
-                                         Heartbeat.timestamp >= live.start_time,
-                                         Heartbeat.timestamp <= live.end_time).to_list()
 
     async def if_same_live(self, room_id: int, timestamp: int):
         room_info = await LiveRoom(room_id).get_room_info()
