@@ -38,6 +38,7 @@ class ConfigModel(BaseModel):
     conn_str: str
     database_name: str
     enable_local_assets: bool
+    log_level: str
     commands: List[str]
 
 

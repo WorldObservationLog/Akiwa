@@ -1,5 +1,6 @@
 import sys
 import time
+import asyncio
 
 from creart import create, it, add_creator
 from graia.broadcast import Broadcast
@@ -9,14 +10,13 @@ from loguru import logger
 from src.config import Config, ConfigCreator
 from src.events import CollectorStartEvent
 
-logger.remove()
-logger.add(sys.stderr, level="INFO")
-
+saya = create(Saya)
 add_creator(ConfigCreator)
 create(Config)
-saya = create(Saya)
 loop = asyncio.get_event_loop()
 
+logger.remove()
+logger.add(sys.stderr, level=it(Config).config.log_level)
 
 from src.database.database import Database, DatabaseCreator
 
