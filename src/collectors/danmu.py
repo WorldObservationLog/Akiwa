@@ -2,6 +2,7 @@ import asyncio
 import struct
 import time
 
+from bilibili_api.live import LiveDanmaku
 from creart import it
 from danmu import DanmuClient
 from graia.saya import Saya, Channel
@@ -15,38 +16,37 @@ from src.types import DANMU_MSG
 saya = Saya.current()
 channel = Channel.current()
 config = it(Config).config
+current_danmu_client = None
 
 
-@channel.use(ListenerSchema(listening_events=[CollectorStartEvent]))
-async def danmu_receiver(event: CollectorStartEvent):
+@channel.use(ListenerSchema(listening_events=[LiveStartEvent]))
+async def danmu_receiver(event: LiveStartEvent):
+    global current_danmu_client
     loop = asyncio.get_running_loop()
+    room_id = event.room_id
 
-    async def receive_danmu(room_id: int, danmu: dict):
+    async def receive_danmu(raw_danmu: dict):
+        danmu_type = raw_danmu["name"]
+        danmu = raw_danmu["data"][0]["data"]
         timestamp = int(time.time())
-        if danmu["cmd"] in ["DANMU_MSG", "DANMU_MSG:4:0:2:2:2:0"]:
+        if danmu_type in ["DANMU_MSG", "DANMU_MSG:4:0:2:2:2:0"]:
             bcc.postEvent(DanmuReceivedEvent(room_id=room_id, command=danmu["cmd"],
                                              data=DANMU_MSG.from_danmu(danmu["info"]).dict(),
                                              timestamp=timestamp))
         else:
-            if danmu["cmd"] in config.commands and not danmu["cmd"] in ["PREPARING", "LIVE"]:
+            if danmu_type in config.commands:
                 bcc.postEvent(DanmuReceivedEvent(room_id=room_id, command=danmu["cmd"],
                                                  data=danmu["data"], timestamp=timestamp))
-            elif danmu["cmd"] in ["PREPARING", "LIVE"]:
-                bcc.postEvent(DanmuReceivedEvent(room_id=room_id, command=danmu["cmd"],
-                                                 data={}, timestamp=timestamp))
-                if danmu["cmd"] == "PREPARING":
-                    bcc.postEvent(LiveEndEvent(room_id=room_id, timestamp=timestamp))
-                else:
-                    bcc.postEvent(LiveStartEvent(room_id=room_id, timestamp=timestamp))
 
-    async def receive_heartbeat(room_id, rawDanmu):
-        timestamp = int(time.time())
-        bcc.postEvent(HeartbeatReceivedEvent(room_id=room_id,
-                                             watching=struct.unpack("!I", rawDanmu.body)[0],
-                                             timestamp=timestamp))
+    client = LiveDanmaku(event.room_id, credential=config.account.to_credential())
+    client.add_event_listener("__ALL__", receive_danmu)
+    current_danmu_client = client
+    loop.create_task(client.connect())
+    logger.debug(f"Danmu receiver of {event.room_id} started!")
 
-    for i in it(Config).config.listening.room:
-        dmc = DanmuClient(i)
-        dmc.on_danmu(receive_danmu)
-        dmc.on_heartbeat(receive_heartbeat)
-        dmc.run(loop)
+
+@channel.use(ListenerSchema(listening_events=[LiveEndEvent]))
+async def stop_receive_danmu(event: LiveEndEvent):
+    if current_danmu_client:
+        await current_danmu_client.disconnect()
+        logger.debug(f"Danmu receiver of {event.room_id} stopped!")

@@ -6,6 +6,13 @@ enable_local_assets = false
 [listening]
 room = [25512465, 25512476, 25512485, 25512501, 25512443]
 user = []
+[account]
+# 参考 https://nemo2011.github.io/bilibili-api/#/get-credential 以获取Bilibili账户凭证
+sessdata = ""
+bili_jct = ""
+buvid3 = ""
+deaduserid = ""
+ac_time_value = ""
 
 [jieba]
 words = []
