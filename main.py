@@ -22,6 +22,7 @@ add_creator(DatabaseCreator)
 create(Database)
 
 with saya.module_context():
+    saya.require("src.collectors.live")
     saya.require("src.collectors.danmu")
     saya.require("src.receivers.danmu")
 

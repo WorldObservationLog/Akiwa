@@ -4,11 +4,13 @@ import tomli
 from creart import exists_module
 from creart.creator import AbstractCreator, CreateTargetInfo
 from pydantic import BaseModel
+from bilibili_api import Credential
 
 
 class Listening(BaseModel):
     room: List[int]
     user: List[int]
+    check_interval: int
 
 
 class Jieba(BaseModel):
