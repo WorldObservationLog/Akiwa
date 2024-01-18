@@ -32,3 +32,17 @@ class LiveEndEvent(Event):
 class GetFollowersEvent(Event):
     uid: int
     followers: int
+
+
+class GetGuardsEvent(Event):
+    uid: int
+    guards: int
+
+
+class TimesUpEvent(Event):
+    ...
+
+
+class RoomInfoChangedEvent(Event):
+    room_id: int
+    title: str

@@ -9,13 +9,16 @@ from graia.saya.builtins.broadcast.behaviour import ListenerSchema
 
 from src.collectors import bcc
 from src.config import Config
-from src.events import DanmuReceivedEvent, LiveStartEvent, LiveEndEvent
+from src.events import DanmuReceivedEvent, LiveStartEvent, LiveEndEvent, TimesUpEvent, CollectorStartEvent, \
+    RoomInfoChangedEvent
+from src.global_vars import GlobalVars
 from src.types import DANMU_MSG
 
 saya = Saya.current()
 channel = Channel.current()
 config = it(Config).config
-current_danmu_client = None
+global_vars = it(GlobalVars)
+current_danmu_client = {}
 
 
 @channel.use(ListenerSchema(listening_events=[LiveStartEvent]))
@@ -26,26 +29,45 @@ async def danmu_receiver(event: LiveStartEvent):
 
     async def receive_danmu(raw_danmu: dict):
         danmu_type = raw_danmu["name"]
+        if len(raw_danmu["data"]) > 1:
+            breakpoint()
+        if danmu_type == "TIMEOUT":
+            return
         danmu = raw_danmu["data"][0]["data"]
         timestamp = int(time.time())
-        if danmu_type in ["DANMU_MSG", "DANMU_MSG:4:0:2:2:2:0"]:
+        if danmu_type == "DANMU_MSG":
             bcc.postEvent(DanmuReceivedEvent(room_id=room_id, command=danmu["cmd"],
-                                             data=DANMU_MSG.from_danmu(danmu["info"]).dict(),
+                                             data=DANMU_MSG.from_danmu(danmu["info"]).model_dump(),
                                              timestamp=timestamp))
+        elif danmu_type == "ROOM_CHANGE":
+            bcc.postEvent(RoomInfoChangedEvent(room_id=room_id, title=danmu["title"], timestamp=timestamp))
         else:
             if danmu_type in config.commands:
                 bcc.postEvent(DanmuReceivedEvent(room_id=room_id, command=danmu["cmd"],
                                                  data=danmu["data"], timestamp=timestamp))
 
-    client = LiveDanmaku(event.room_id, credential=config.account.to_credential())
+    if current_danmu_client.values() or (current_danmu_client == [None] * len(current_danmu_client)):
+        logger.warning("Akiwa is listening multi live rooms! It may cause danmu lost!")
+    if await global_vars.credential.check_refresh():
+        await global_vars.credential.refresh()
+    client = LiveDanmaku(event.room_id, credential=global_vars.credential)
     client.add_event_listener("__ALL__", receive_danmu)
-    current_danmu_client = client
+    current_danmu_client[event.room_id] = client
     loop.create_task(client.connect())
     logger.debug(f"Danmu receiver of {event.room_id} started!")
 
 
 @channel.use(ListenerSchema(listening_events=[LiveEndEvent]))
 async def stop_receive_danmu(event: LiveEndEvent):
+    global current_danmu_client
     if current_danmu_client:
-        await current_danmu_client.disconnect()
+        await current_danmu_client[event.room_id].disconnect()
+        current_danmu_client[event.room_id] = None
         logger.debug(f"Danmu receiver of {event.room_id} stopped!")
+
+
+@channel.use(ListenerSchema(listening_events=[TimesUpEvent, CollectorStartEvent]))
+async def refresh_credential():
+    if await global_vars.credential.check_refresh():
+        logger.debug("Bilibili credential refreshed")
+        await global_vars.credential.refresh()

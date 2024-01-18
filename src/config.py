@@ -19,6 +19,16 @@ class Jieba(BaseModel):
     stop_words: List[str]
 
 
+class Render(BaseModel):
+    seaborn_style: str
+    font_path: str
+
+
+class Service(BaseModel):
+    host: str
+    port: int
+
+
 class Account(BaseModel):
     sessdata: str
     bili_jct: str
@@ -35,10 +45,12 @@ class ConfigModel(BaseModel):
     listening: Listening
     jieba: Jieba
     account: Account
+    render: Render
+    service: Service
     conn_str: str
     database_name: str
-    enable_local_assets: bool
     log_level: str
+    schedule_interval: int
     commands: List[str]
 
 
@@ -47,7 +59,7 @@ class Config:
 
     def __init__(self) -> None:
         with open("config.toml", "rb") as f:
-            self.config = ConfigModel.parse_obj(tomli.load(f))
+            self.config = ConfigModel.model_validate(tomli.load(f))
 
 
 class ConfigCreator(AbstractCreator):

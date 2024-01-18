@@ -5,10 +5,14 @@ import asyncio
 from creart import create, it, add_creator
 from graia.broadcast import Broadcast
 from graia.saya import Saya
+from graia.scheduler import GraiaScheduler
+from graia.scheduler.saya import GraiaSchedulerBehaviour
 from loguru import logger
 
 from src.config import Config, ConfigCreator
 from src.events import CollectorStartEvent
+from src.realtime.database import RealtimeDatabaseCreator, RealtimeDatabase
+from src.global_vars import GlobalVarsCreator, GlobalVars
 
 saya = create(Saya)
 add_creator(ConfigCreator)
@@ -22,29 +26,20 @@ from src.database.database import Database, DatabaseCreator
 
 add_creator(DatabaseCreator)
 create(Database)
+add_creator(RealtimeDatabaseCreator)
+create(RealtimeDatabase)
+add_creator(GlobalVarsCreator)
+create(GlobalVars)
+
 
 with saya.module_context():
+    saya.require("src.schedule")
     saya.require("src.collectors.live")
     saya.require("src.collectors.danmu")
+    saya.require("src.collectors.user")
     saya.require("src.receivers.danmu")
-
-if it(Config).config.enable_local_assets:
-    from pathlib import Path
-    if Path("pyecharts-assets").exists():
-        import functools
-        from http.server import HTTPServer, SimpleHTTPRequestHandler
-        from pyecharts.globals import CurrentConfig
-
-        class quietServer(SimpleHTTPRequestHandler):
-            def log_message(self, format, *args):
-                pass
-
-        handler = functools.partial(quietServer, directory="pyecharts-assets")
-        httpd = HTTPServer(("0.0.0.0", 8000), handler)
-        loop.run_in_executor(None, httpd.serve_forever)
-        CurrentConfig.ONLINE_HOST = "http://127.0.0.1:8000/assets/"
-    else:
-        logger.error("The pyecharts-assets directory does not exists!")
+    saya.require("src.receivers.user")
+    saya.require("src.services.services")
 
 if __name__ == "__main__":
     it(Broadcast).postEvent(CollectorStartEvent(timestamp=int(time.time())))

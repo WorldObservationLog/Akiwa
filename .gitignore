@@ -101,3 +101,4 @@ ENV/
 
 config.toml
 poetry.lock
+test.py

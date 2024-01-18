@@ -1,13 +1,17 @@
 conn_str = ""
 database_name = ""
 commands = ["INTERACT_WORD", "ENTRY_EFFECT", "DANMU_MSG", "SEND_GIFT", "COMBO_SEND", "LIVE", "PREPARING", "SUPER_CHAT_MESSAGE", "GUARD_BUY", "DANMU_MSG:4:0:2:2:2:0"]
-enable_local_assets = false
 log_level = "DEBUG"
+schedule_interval = 300 # seconds
 
 [listening]
 room = [25512465, 25512476, 25512485, 25512501, 25512443]
 user = []
 check_interval = 30 # seconds
+
+[service]
+host = "127.0.0.1"
+port = "12345"
 
 [account]
 # 参考 https://nemo2011.github.io/bilibili-api/#/get-credential 以获取Bilibili账户凭证
@@ -16,6 +20,10 @@ bili_jct = ""
 buvid3 = ""
 deaduserid = ""
 ac_time_value = ""
+
+[render]
+seaborn_style = ""
+font_path = ""
 
 [jieba]
 words = []
@@ -74,16 +82,3 @@ stop_words = ["———", "》），", "）÷（１－", "”，", "）、", "�
     "诸位", "着", "着呢", "自", "自从", "自个儿", "自各儿", "自己", "自家", "自身", "综上所述", "总的来看",
     "总的来说", "总的说来", "总而言之", "总之", "纵", "纵令", "纵然", "纵使", "遵照", "作为", "兮", "呃",
     "呗", "咚", "咦", "喏", "啐", "喔唷", "嗬", "嗯", "嗳"]
-
-[platform]
-name = ["telegraph"]
-
-[[platform.config]]
-name = "telegraph"
-template = "telegraph.jinja2"
-post_platform = { name = "telegram", data = { bot_token = "", target = "" } }
-
-[[platform.config]]
-name = "bilibili"
-template = "bilibili.jinja2"
-data = { "bili_jct" = "", "sessdata" = "", "buvid3" = "", "deaduserid" = "", "tags" = ""}
