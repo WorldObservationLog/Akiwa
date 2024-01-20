@@ -58,7 +58,7 @@ def convert_danmu(danmu: DanmuReceivedEvent):
         case Commands.POPULARITY_RED_POCKET_NEW:
             # 单位是电池，每个红包主播抽成20%
             data = danmu_item(price=danmu.data.get("price") / 10 / 5)
-        case Commands.GUARD_BUY | Commands.USER_TOAST_MSG:
+        case Commands.GUARD_BUY:
             # 单位是金瓜子
             data = danmu_item(price=danmu.data.get("price") / 1000)
         case Commands.COMBO_SEND:
