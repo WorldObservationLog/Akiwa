@@ -1,10 +1,11 @@
 import asyncio
 from datetime import datetime
+from io import BytesIO
 
 from creart import it
 from graia.saya import Saya, Channel
 from graia.saya.builtins.broadcast import ListenerSchema
-from quart import Quart, request
+from quart import Quart, request, send_file
 from quart_schema import QuartSchema, validate_response
 
 from src.analysis.live import LiveAnalysis
@@ -51,14 +52,12 @@ async def startup():
 
 
 @app.route("/live/all")
-@validate_response(Response)
 async def get_lives():
     return Response(data=[Live(live_id=i.live_id, room_id=i.room_id, title=i.title,
                                start_time=i.start_time, end_time=i.end_time) for i in await db.get_lives()])
 
 
 @app.route("/live/latest/<int:room_id>")
-@validate_response(Response)
 async def get_latest_live(room_id: int):
     latest_live = await db.get_latest_live(room_id)
     return Response(data=Live(live_id=latest_live.live_id, room_id=latest_live.room_id, title=latest_live.title,
@@ -66,7 +65,6 @@ async def get_latest_live(room_id: int):
 
 
 @app.route("/live/now")
-@validate_response(Response)
 async def get_streaming_live():
     if global_vars.current_live:
         results = [Live(live_id=live.live_id, room_id=live.room_id,
@@ -78,174 +76,154 @@ async def get_streaming_live():
 
 
 @app.route("/live/<live_id>/revenue")
-@validate_response(Response)
 async def get_revenue(live_id: str):
     await check_analysis_exist(live_id)
     return Response(data=Revenue(analysis[live_id].du.sum_earning()))
 
 
 @app.route("/live/<live_id>/audience_compare")
-@validate_response(Response)
 async def get_audience_compare(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
         return Response(data=await analysis[live_id].generate_audience_compare(data=True))
-    return await analysis[live_id].generate_audience_compare()
+    return await send_file(BytesIO(await analysis[live_id].generate_audience_compare()), mimetype="image/png")
 
 
 @app.route("/live/<live_id>/medal_compare")
-@validate_response(Response)
 async def get_medal_compare(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
         return Response(data=await analysis[live_id].generate_medal_compare(data=True))
-    return await analysis[live_id].generate_medal_compare()
+    return await send_file(BytesIO(await analysis[live_id].generate_medal_compare()), mimetype="image/png")
 
 
 @app.route("/live/<live_id>/word_frequency")
-@validate_response(Response)
 async def get_word_frequency(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
         return Response(data=await analysis[live_id].generate_word_frequency(data=True))
-    return await analysis[live_id].generate_word_frequency()
+    return await send_file(BytesIO(await analysis[live_id].generate_word_frequency()), mimetype="image/png")
 
 
 @app.route("/live/<live_id>/word_cloud")
-@validate_response(Response)
 async def get_word_cloud(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
         return Response(data=await analysis[live_id].generate_wordcloud(data=True))
-    return Response(data=await analysis[live_id].generate_wordcloud())
+    return await send_file(BytesIO(await analysis[live_id].generate_wordcloud()), mimetype="image/png")
 
 
 @app.route("/live/<live_id>/revenue_scale")
-@validate_response(Response)
 async def get_revenue_scale(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
         return Response(data=await analysis[live_id].generate_revenue_scale(data=True))
-    return await analysis[live_id].generate_revenue_scale()
+    return await send_file(BytesIO(await analysis[live_id].generate_revenue_scale()), mimetype="image/png")
 
 
 @app.route("/live/<live_id>/revenue_type_scale")
-@validate_response(Response)
 async def get_revenue_type_scale(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
         return Response(data=await analysis[live_id].generate_revenue_type_scale(data=True))
-    return await analysis[live_id].generate_revenue_type_scale()
+    return await send_file(BytesIO(await analysis[live_id].generate_revenue_type_scale()), mimetype="image/png")
 
 
 @app.route("/live/<live_id>/revenue_type_scale_by_times")
-@validate_response(Response)
 async def get_revenue_type_scale_by_times(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
         return Response(data=await analysis[live_id].generate_revenue_type_scale_by_times(data=True))
-    return await analysis[live_id].generate_revenue_type_scale_by_times()
+    return await send_file(BytesIO(await analysis[live_id].generate_revenue_type_scale_by_times()), mimetype="image/png")
 
 
 @app.route("/live/<live_id>/medal_scale")
-@validate_response(Response)
 async def get_medal_scale(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
         return Response(data=await analysis[live_id].generate_medal_scale(data=True))
-    return await analysis[live_id].generate_medal_scale()
+    return await send_file(BytesIO(await analysis[live_id].generate_medal_scale()), mimetype="image/png")
 
 
 @app.route("/live/<live_id>/earning_timing")
-@validate_response(Response)
 async def get_earning_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
         return Response(data=await analysis[live_id].generate_earning_timing(data=True))
-    return await analysis[live_id].generate_earning_timing()
+    return await send_file(BytesIO(await analysis[live_id].generate_earning_timing()), mimetype="image/png")
 
 
 @app.route("/live/<live_id>/danmu_timing")
-@validate_response(Response)
 async def get_danmu_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
         return Response(data=await analysis[live_id].generate_danmu_timing(data=True))
-    return await analysis[live_id].generate_danmu_timing()
+    return await send_file(BytesIO(await analysis[live_id].generate_danmu_timing()), mimetype="image/png")
 
 
 @app.route("/live/<live_id>/guard_timing")
-@validate_response(Response)
 async def get_guard_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
         return Response(data=await analysis[live_id].generate_guard_timing(data=True))
-    return await analysis[live_id].generate_guard_timing()
+    return await send_file(BytesIO(await analysis[live_id].generate_guard_timing()), mimetype="image/png")
 
 
 @app.route("/live/<live_id>/superchat_timing")
-@validate_response(Response)
 async def get_superchat_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
         return Response(data=await analysis[live_id].generate_superchat_timing(data=True))
-    return await analysis[live_id].generate_superchat_timing()
+    return await send_file(BytesIO(await analysis[live_id].generate_superchat_timing()), mimetype="image/png")
 
 
 @app.route("/live/<live_id>/paid_and_online_timing")
-@validate_response(Response)
 async def get_paid_and_online_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
         return Response(data=await analysis[live_id].generate_paid_and_online_timing(data=True))
-    return await analysis[live_id].generate_paid_and_online_timing()
+    return await send_file(BytesIO(await analysis[live_id].generate_paid_and_online_timing()), mimetype="image/png")
 
 
 @app.route("/live/<live_id>/popular_rank_timing")
-@validate_response(Response)
 async def get_popular_rank_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
         return Response(data=await analysis[live_id].generate_popular_rank_timing(data=True))
-    return await analysis[live_id].generate_popular_rank_timing()
+    return await send_file(BytesIO(await analysis[live_id].generate_popular_rank_timing()), mimetype="image/png")
 
 
 @app.route("/live/<live_id>/like_timing")
-@validate_response(Response)
 async def get_like_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
         return Response(data=await analysis[live_id].generate_like_timing(data=True))
-    return await analysis[live_id].generate_like_timing()
+    return await send_file(BytesIO(await analysis[live_id].generate_like_timing()), mimetype="image/png")
 
 
 @app.route("/live/<live_id>/watched_timing")
-@validate_response(Response)
 async def get_watched_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
         return Response(data=await analysis[live_id].generate_watched_timing(data=True))
-    return await analysis[live_id].generate_watched_timing()
+    return await send_file(BytesIO(await analysis[live_id].generate_watched_timing()), mimetype="image/png")
 
 
 @app.route("/live/<live_id>/followers_increment_timing")
-@validate_response(Response)
 async def get_followers_increment_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
         return Response(data=await analysis[live_id].generate_followers_increment_timing(data=True))
-    return await analysis[live_id].generate_followers_increment_timing()
+    return await send_file(BytesIO(await analysis[live_id].generate_followers_increment_timing()), mimetype="image/png")
 
 
 @app.route("/live/<live_id>/realtime/revenue")
-@validate_response(Response)
 async def get_realtime_revenue(live_id: str):
     await check_realtime_analysis_exist(live_id)
     return Response(data=Revenue(realtime_analysis.du.sum_earning()))
 
 
 @app.route("/live/<live_id>/realtime/watched")
-@validate_response(Response)
 async def get_realtime_watched(live_id: str):
     await check_analysis_exist(live_id)
     watched = realtime_analysis.du.get_watched_counts()
@@ -258,7 +236,6 @@ async def get_realtime_watched(live_id: str):
 
 
 @app.route("/live/<live_id>/realtime/paid")
-@validate_response(Response)
 async def get_realtime_paid(live_id: str):
     await check_analysis_exist(live_id)
     paid = realtime_analysis.du.get_paid_count()
@@ -271,7 +248,6 @@ async def get_realtime_paid(live_id: str):
 
 
 @app.route("/live/<live_id>/realtime/online")
-@validate_response(Response)
 async def get_realtime_online(live_id: str):
     await check_analysis_exist(live_id)
     online = realtime_analysis.du.get_online_count()
@@ -284,7 +260,6 @@ async def get_realtime_online(live_id: str):
 
 
 @app.route("/live/<live_id>/realtime/popular_rank")
-@validate_response(Response)
 async def get_realtime_rank(live_id: str):
     await check_analysis_exist(live_id)
     popular_rank = realtime_analysis.du.get_popular_rank()
