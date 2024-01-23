@@ -1,8 +1,9 @@
 from beanie import Document
 from creart import AbstractCreator, CreateTargetInfo, exists_module
-from tinydb import TinyDB
+from tinydb import TinyDB, Query
 from tinydb.storages import MemoryStorage
 
+from src.database.models.live import Live
 from src.events import DanmuReceivedEvent
 from src.utils import convert_danmu
 
@@ -18,6 +19,9 @@ class RealtimeDatabase:
 
     def clear(self):
         self.db.truncate()
+
+    def remove_danmus_of_live(self, live: Live):
+        self.db.remove(Query().live_id == live.live_id)
 
 
 class RealtimeDatabaseCreator(AbstractCreator):

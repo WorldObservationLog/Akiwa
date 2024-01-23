@@ -55,7 +55,7 @@ async def live_end_receiver(event: LiveEndEvent):
     global_vars.current_live = [i for i in global_vars.current_live if i.live_id != live.live_id]
     if not global_vars.current_live:
         global_vars.live_status = False
-    realtime_db.clear()
+    realtime_db.remove_danmus_of_live(live)
 
 
 @channel.use(ListenerSchema(listening_events=[RoomInfoChangedEvent]))
