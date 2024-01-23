@@ -1,4 +1,5 @@
 import asyncio
+import json
 import time
 
 from loguru import logger
@@ -48,8 +49,7 @@ async def danmu_receiver(event: LiveStartEvent):
 
     if current_danmu_client.values() or (current_danmu_client == [None] * len(current_danmu_client)):
         logger.warning("Akiwa is listening multi live rooms! It may cause danmu lost!")
-    if await global_vars.credential.check_refresh():
-        await global_vars.credential.refresh()
+    await refresh_credential()
     client = LiveDanmaku(event.room_id, credential=global_vars.credential)
     client.add_event_listener("__ALL__", receive_danmu)
     current_danmu_client[event.room_id] = client
@@ -71,3 +71,7 @@ async def refresh_credential():
     if await global_vars.credential.check_refresh():
         logger.debug("Bilibili credential refreshed")
         await global_vars.credential.refresh()
+        with open("credential.json", "w") as f:
+            json.dump({"sessdata": global_vars.credential.sessdata, "bili_jct": global_vars.credential.bili_jct,
+                       "buvid3": global_vars.credential.buvid3, "deaduserid": global_vars.credential.dedeuserid,
+                       "ac_time_value": global_vars.credential.ac_time_value}, f)
