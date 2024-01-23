@@ -29,10 +29,15 @@ class Database:
         await convert_danmu(danmu).insert()
 
     async def get_danmu(self, live: Live):
-        return await Danmu.find_many(
-            Danmu.room_id == live.room_id,
-            Danmu.timestamp >= live.start_time,
-            Danmu.timestamp <= live.end_time).to_list()
+        if live.end_time:
+            return await Danmu.find_many(
+                Danmu.room_id == live.room_id,
+                Danmu.timestamp >= live.start_time,
+                Danmu.timestamp <= live.end_time).to_list()
+        else:
+            return await Danmu.find_many(
+                Danmu.room_id == live.room_id,
+                Danmu.timestamp >= live.start_time).to_list()
 
     async def add_live(self, live: Live):
         if not await self.if_same_live(live.room_id, live.start_time):

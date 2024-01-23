@@ -1,3 +1,4 @@
+from beanie import Document
 from creart import AbstractCreator, CreateTargetInfo, exists_module
 from tinydb import TinyDB
 from tinydb.storages import MemoryStorage
@@ -12,8 +13,8 @@ class RealtimeDatabase:
     def add_danmu(self, danmu: DanmuReceivedEvent):
         self.db.insert(convert_danmu(danmu).model_dump())
 
-    def add_danmus_from_database(self, danmus: list[dict]):
-        self.db.insert_multiple(danmus)
+    def add_danmus_from_database(self, danmus: list[Document]):
+        self.db.insert_multiple([i.model_dump() for i in danmus])
 
     def clear(self):
         self.db.truncate()
