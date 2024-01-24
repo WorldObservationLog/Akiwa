@@ -23,7 +23,7 @@ ac_time_value = ""
 
 [render]
 seaborn_style = "whitegrid"
-font = "SimHei"
+font = "Noto Sans SC"
 
 [jieba]
 words = []
