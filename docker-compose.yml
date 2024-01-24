@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "12345:12345" # for service mode
+    depends_on:
+      - db
+    environment:
+      - MONGO_URI=mongodb://db:27017
+    volumes:
+      - /path/to/your/config.toml:/app/config.toml # config file
+
+  db:
+    image: mongo:latest
+    volumes:
+      - /path/to/your/db:/data/db # data file 
