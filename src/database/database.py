@@ -12,6 +12,7 @@ from src.database.models.live import Live
 from src.database.models.record import Record
 from src.events import DanmuReceivedEvent
 from src.utils import convert_danmu
+import os
 
 config = it(Config).config
 bcc = it(Broadcast)
@@ -19,7 +20,8 @@ loop = asyncio.get_event_loop()
 
 
 class Database:
-    _client = AsyncIOMotorClient(config.conn_str)
+    _mongo_uri = os.environ.get("MONGO_URI") or config.conn_str
+    _client = AsyncIOMotorClient(_mongo_uri)
 
     def __init__(self):
         loop.run_until_complete(init_beanie(database=self._client[config.database_name],
