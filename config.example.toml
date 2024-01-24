@@ -24,6 +24,7 @@ ac_time_value = ""
 [render]
 seaborn_style = ""
 font_path = ""
+font = "SimHei"
 
 [jieba]
 words = []

@@ -11,10 +11,12 @@ from pydantic import BaseModel
 from creart import it
 
 from src.config import Config
+from src.utils import get_font_path
 
 sns.set_style(it(Config).config.render.seaborn_style)
-fontManager.addfont(it(Config).config.render.font_path)
-prop = FontProperties(fname=it(Config).config.render.font_path)
+font_path = get_font_path(it(Config).config.render.font)
+fontManager.addfont(font_path)
+prop = FontProperties(fname=font_path)
 sns.set(font=prop.get_name())
 
 

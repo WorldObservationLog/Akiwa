@@ -1,5 +1,8 @@
 import time
+from pathlib import Path
 
+import matplotlib.font_manager
+from PIL import ImageFont
 from loguru import logger
 
 from src.database.models.danmu import DanmuType, DANMU_TYPE_MATCHES, Medal, Danmu
@@ -132,3 +135,13 @@ def preprocess_danmu(danmu: DanmuReceivedEvent):
                 return [danmu]
         case _:
             return [danmu]
+
+
+def get_font_path(font: str):
+    if not Path(font).exists():
+        # may cause lag
+        for filename in matplotlib.font_manager.findSystemFonts(fontpaths=None):
+            name, _ = ImageFont.FreeTypeFont(filename).getname()
+            if name == font:
+                return filename
+    return font

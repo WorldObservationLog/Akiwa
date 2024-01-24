@@ -21,7 +21,7 @@ class Jieba(BaseModel):
 
 class Render(BaseModel):
     seaborn_style: str
-    font_path: str
+    font: str
 
 
 class Service(BaseModel):
