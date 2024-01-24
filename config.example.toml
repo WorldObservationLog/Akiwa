@@ -1,11 +1,11 @@
 conn_str = ""
-database_name = ""
-commands = ["INTERACT_WORD", "ENTRY_EFFECT", "DANMU_MSG", "SEND_GIFT", "COMBO_SEND", "LIVE", "PREPARING", "SUPER_CHAT_MESSAGE", "GUARD_BUY", "DANMU_MSG:4:0:2:2:2:0"]
+database_name = "akiwa"
+commands = ["INTERACT_WORD", "ENTRY_EFFECT", "DANMU_MSG", "SEND_GIFT", "COMBO_SEND", "SUPER_CHAT_MESSAGE", "GUARD_BUY",  "LIKE_INFO_V3_UPDATE", "WATCHED_CHANGE", "ONLINE_RANK_COUNT", "POPULAR_RANK_CHANGED", "POPULARITY_RED_POCKET_NEW"]
 log_level = "DEBUG"
 schedule_interval = 300 # seconds
 
 [listening]
-room = [25512465, 25512476, 25512485, 25512501, 25512443]
+room = []
 user = []
 check_interval = 30 # seconds
 
@@ -22,8 +22,7 @@ deaduserid = ""
 ac_time_value = ""
 
 [render]
-seaborn_style = ""
-font_path = ""
+seaborn_style = "whitegrid"
 font = "SimHei"
 
 [jieba]
