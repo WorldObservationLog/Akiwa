@@ -69,9 +69,11 @@ async def stop_receive_danmu(event: LiveEndEvent):
 @channel.use(ListenerSchema(listening_events=[TimesUpEvent, CollectorStartEvent]))
 async def refresh_credential():
     if await global_vars.credential.check_refresh():
-        logger.debug("Bilibili credential refreshed")
-        await global_vars.credential.refresh()
-        with open("credential.json", "w") as f:
-            json.dump({"sessdata": global_vars.credential.sessdata, "bili_jct": global_vars.credential.bili_jct,
-                       "buvid3": global_vars.credential.buvid3, "deaduserid": global_vars.credential.dedeuserid,
-                       "ac_time_value": global_vars.credential.ac_time_value}, f)
+        logger.warning("Bilibili credential is invalid!")
+        # bilibili-api-python 及其 dev 分支均无法刷新cookie，怀疑算法已修改
+        # await global_vars.credential.refresh()
+        # logger.debug("Bilibili credential refreshed")
+        # with open("credential.json", "w") as f:
+        #    json.dump({"sessdata": global_vars.credential.sessdata, "bili_jct": global_vars.credential.bili_jct,
+        #               "buvid3": global_vars.credential.buvid3, "deaduserid": global_vars.credential.dedeuserid,
+        #               "ac_time_value": global_vars.credential.ac_time_value}, f)
