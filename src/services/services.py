@@ -57,20 +57,21 @@ async def get_streaming_live():
                         end_time=live.end_time) for live in global_vars.current_live]
         return Response(data=results)
     else:
-        return Response(data=None, error=Error("NO_LIVE", "There is not any live streaming now!"))
+        return Response(data=None, error=Error(type="NO_LIVE",
+                                               message="There is not any live streaming now!"))
 
 
 @bp.route("/live/<live_id>/revenue")
 async def get_revenue(live_id: str):
     await check_analysis_exist(live_id)
-    return Response(data=Revenue(analysis[live_id].du.sum_earning()))
+    return Response(data=Revenue(amount=analysis[live_id].du.sum_earning()))
 
 
 @bp.route("/live/<live_id>/audience_compare")
 async def get_audience_compare(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
-        return Response(data=await analysis[live_id].generate_audience_compare(data=True))
+        return Response(data=await analysis[live_id].generate_audience_compare(data=True)).model_dump()
     return await send_file(BytesIO(await analysis[live_id].generate_audience_compare()), mimetype="image/png")
 
 
@@ -78,7 +79,7 @@ async def get_audience_compare(live_id: str):
 async def get_medal_compare(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
-        return Response(data=await analysis[live_id].generate_medal_compare(data=True))
+        return Response(data=await analysis[live_id].generate_medal_compare(data=True)).model_dump()
     return await send_file(BytesIO(await analysis[live_id].generate_medal_compare()), mimetype="image/png")
 
 
@@ -86,7 +87,7 @@ async def get_medal_compare(live_id: str):
 async def get_word_frequency(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
-        return Response(data=await analysis[live_id].generate_word_frequency(data=True))
+        return Response(data=await analysis[live_id].generate_word_frequency(data=True)).model_dump()
     return await send_file(BytesIO(await analysis[live_id].generate_word_frequency()), mimetype="image/png")
 
 
@@ -94,7 +95,7 @@ async def get_word_frequency(live_id: str):
 async def get_word_cloud(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
-        return Response(data=await analysis[live_id].generate_wordcloud(data=True))
+        return Response(data=await analysis[live_id].generate_wordcloud(data=True)).model_dump()
     return await send_file(BytesIO(await analysis[live_id].generate_wordcloud()), mimetype="image/png")
 
 
@@ -102,7 +103,7 @@ async def get_word_cloud(live_id: str):
 async def get_revenue_scale(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
-        return Response(data=await analysis[live_id].generate_revenue_scale(data=True))
+        return Response(data=await analysis[live_id].generate_revenue_scale(data=True)).model_dump()
     return await send_file(BytesIO(await analysis[live_id].generate_revenue_scale()), mimetype="image/png")
 
 
@@ -110,7 +111,7 @@ async def get_revenue_scale(live_id: str):
 async def get_revenue_type_scale(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
-        return Response(data=await analysis[live_id].generate_revenue_type_scale(data=True))
+        return Response(data=await analysis[live_id].generate_revenue_type_scale(data=True)).model_dump()
     return await send_file(BytesIO(await analysis[live_id].generate_revenue_type_scale()), mimetype="image/png")
 
 
@@ -118,7 +119,7 @@ async def get_revenue_type_scale(live_id: str):
 async def get_revenue_type_scale_by_times(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
-        return Response(data=await analysis[live_id].generate_revenue_type_scale_by_times(data=True))
+        return Response(data=await analysis[live_id].generate_revenue_type_scale_by_times(data=True)).model_dump()
     return await send_file(BytesIO(await analysis[live_id].generate_revenue_type_scale_by_times()), mimetype="image/png")
 
 
@@ -126,7 +127,7 @@ async def get_revenue_type_scale_by_times(live_id: str):
 async def get_medal_scale(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
-        return Response(data=await analysis[live_id].generate_medal_scale(data=True))
+        return Response(data=await analysis[live_id].generate_medal_scale(data=True)).model_dump()
     return await send_file(BytesIO(await analysis[live_id].generate_medal_scale()), mimetype="image/png")
 
 
@@ -134,7 +135,7 @@ async def get_medal_scale(live_id: str):
 async def get_earning_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
-        return Response(data=await analysis[live_id].generate_earning_timing(data=True))
+        return Response(data=await analysis[live_id].generate_earning_timing(data=True)).model_dump()
     return await send_file(BytesIO(await analysis[live_id].generate_earning_timing()), mimetype="image/png")
 
 
@@ -142,7 +143,7 @@ async def get_earning_timing(live_id: str):
 async def get_danmu_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
-        return Response(data=await analysis[live_id].generate_danmu_timing(data=True))
+        return Response(data=await analysis[live_id].generate_danmu_timing(data=True)).model_dump()
     return await send_file(BytesIO(await analysis[live_id].generate_danmu_timing()), mimetype="image/png")
 
 
@@ -150,7 +151,7 @@ async def get_danmu_timing(live_id: str):
 async def get_guard_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
-        return Response(data=await analysis[live_id].generate_guard_timing(data=True))
+        return Response(data=await analysis[live_id].generate_guard_timing(data=True)).model_dump()
     return await send_file(BytesIO(await analysis[live_id].generate_guard_timing()), mimetype="image/png")
 
 
@@ -158,7 +159,7 @@ async def get_guard_timing(live_id: str):
 async def get_superchat_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
-        return Response(data=await analysis[live_id].generate_superchat_timing(data=True))
+        return Response(data=await analysis[live_id].generate_superchat_timing(data=True)).model_dump()
     return await send_file(BytesIO(await analysis[live_id].generate_superchat_timing()), mimetype="image/png")
 
 
@@ -166,7 +167,7 @@ async def get_superchat_timing(live_id: str):
 async def get_paid_and_online_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
-        return Response(data=await analysis[live_id].generate_paid_and_online_timing(data=True))
+        return Response(data=await analysis[live_id].generate_paid_and_online_timing(data=True)).model_dump()
     return await send_file(BytesIO(await analysis[live_id].generate_paid_and_online_timing()), mimetype="image/png")
 
 
@@ -174,7 +175,7 @@ async def get_paid_and_online_timing(live_id: str):
 async def get_popular_rank_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
-        return Response(data=await analysis[live_id].generate_popular_rank_timing(data=True))
+        return Response(data=await analysis[live_id].generate_popular_rank_timing(data=True)).model_dump()
     return await send_file(BytesIO(await analysis[live_id].generate_popular_rank_timing()), mimetype="image/png")
 
 
@@ -182,7 +183,7 @@ async def get_popular_rank_timing(live_id: str):
 async def get_like_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
-        return Response(data=await analysis[live_id].generate_like_timing(data=True))
+        return Response(data=await analysis[live_id].generate_like_timing(data=True)).model_dump()
     return await send_file(BytesIO(await analysis[live_id].generate_like_timing()), mimetype="image/png")
 
 
@@ -190,7 +191,7 @@ async def get_like_timing(live_id: str):
 async def get_watched_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
-        return Response(data=await analysis[live_id].generate_watched_timing(data=True))
+        return Response(data=await analysis[live_id].generate_watched_timing(data=True)).model_dump()
     return await send_file(BytesIO(await analysis[live_id].generate_watched_timing()), mimetype="image/png")
 
 
@@ -198,14 +199,14 @@ async def get_watched_timing(live_id: str):
 async def get_followers_increment_timing(live_id: str):
     await check_analysis_exist(live_id)
     if request.args.get("data"):
-        return Response(data=await analysis[live_id].generate_followers_increment_timing(data=True))
+        return Response(data=await analysis[live_id].generate_followers_increment_timing(data=True)).model_dump()
     return await send_file(BytesIO(await analysis[live_id].generate_followers_increment_timing()), mimetype="image/png")
 
 
 @bp.route("/live/<live_id>/realtime/revenue")
 async def get_realtime_revenue(live_id: str):
     await check_realtime_analysis_exist(live_id)
-    return Response(data=Revenue(realtime_analysis.du.sum_earning()))
+    return Response(data=Revenue(amount=realtime_analysis.du.sum_earning()))
 
 
 @bp.route("/live/<live_id>/realtime/watched")
