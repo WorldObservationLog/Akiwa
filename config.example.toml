@@ -13,6 +13,10 @@ check_interval = 30 # seconds
 host = "127.0.0.1"
 port = "12345"
 
+[yomiuri]
+enable = false
+token = ""
+
 [account]
 # 参考 https://nemo2011.github.io/bilibili-api/#/get-credential 以获取Bilibili账户凭证
 sessdata = ""

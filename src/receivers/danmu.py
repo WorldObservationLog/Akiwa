@@ -36,7 +36,7 @@ async def live_start_receiver(event: LiveStartEvent):
     room_info = await LiveRoom(event.room_id).get_room_info()
     live = Live(live_id=uuid4().hex, room_id=event.room_id, start_time=event.timestamp,
                 end_time=0, title=room_info["room_info"]["title"])
-    global_vars.live_status = True
+    global_vars.live_status[event.room_id] = True
     if await db.if_same_live(live.room_id, live.start_time):
         live = await db.get_latest_live(event.room_id)
         global_vars.current_live.append(live)
@@ -53,8 +53,7 @@ async def live_end_receiver(event: LiveEndEvent):
     live.end_time = event.timestamp
     await db.update_live(live)
     global_vars.current_live = [i for i in global_vars.current_live if i.live_id != live.live_id]
-    if not global_vars.current_live:
-        global_vars.live_status = False
+    global_vars.live_status[event.room_id] = False
     realtime_db.remove_danmus_of_live(live)
 
 

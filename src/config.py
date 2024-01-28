@@ -29,6 +29,11 @@ class Service(BaseModel):
     port: int
 
 
+class Yomiuri(BaseModel):
+    enable: bool
+    token: str
+
+
 class Account(BaseModel):
     sessdata: str
     bili_jct: str
@@ -47,6 +52,7 @@ class ConfigModel(BaseModel):
     account: Account
     render: Render
     service: Service
+    yomiuri: Yomiuri
     conn_str: str
     database_name: str
     log_level: str

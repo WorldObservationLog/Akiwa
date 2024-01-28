@@ -11,7 +11,6 @@ packages = [{ include = "src" }]
 python = "^3.11"
 graia-broadcast = "^0.23.4"
 graia-scheduler = "^0.3.1"
-bilibili-api-python = "^16.1.1"
 motor = "^3.3.2"
 pydantic = "^2.5.3"
 websockets = "^10.4"
@@ -30,6 +29,9 @@ quart = "^0.19.4"
 quart-schema = "^0.18.0"
 seaborn = "^0.13.1"
 wordcloud = "^1.9.3"
+python-socketio = "^5.11.0"
+bilibili-api-dev = "^16.2.0b1"
+uvicorn = "^0.27.0"
 
 
 

@@ -9,7 +9,8 @@ from src.database.models.live import Live
 
 
 class GlobalVars:
-    live_status: bool = False
+    live_status = {}
+    listening_status = {}
     credential: Credential = None
     current_live: list[Live] = []
 

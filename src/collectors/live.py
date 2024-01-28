@@ -11,17 +11,18 @@ from graia.saya.builtins.broadcast import ListenerSchema
 from src.collectors import bcc
 from src.config import Config
 from src.events import LiveStartEvent, CollectorStartEvent, LiveEndEvent
+from src.global_vars import GlobalVars
 
 saya = Saya.current()
 channel = Channel.current()
 config = it(Config).config
-live_status = {}
+global_vars = it(GlobalVars)
 
 
 @channel.use(ListenerSchema(listening_events=[CollectorStartEvent]))
 async def check_live_status():
     for room_id in config.listening.room:
-        live_status.update({room_id: False})
+        global_vars.listening_status.update({room_id: False})
     while True:
         for room_id in config.listening.room:
             try:
@@ -31,12 +32,12 @@ async def check_live_status():
                 continue
             if info["room_info"]["live_status"] == 1:
                 logger.debug(f"{room_id} is streaming now.")
-                if not live_status[room_id]:
-                    live_status[room_id] = True
+                if not global_vars.listening_status[room_id]:
+                    global_vars.listening_status[room_id] = True
                     bcc.postEvent(LiveStartEvent(room_id=room_id, timestamp=int(time.time())))
             else:
                 logger.debug(f"{room_id} is not streaming now.")
-                if live_status[room_id]:
-                    live_status[room_id] = False
+                if global_vars.listening_status[room_id]:
+                    global_vars.listening_status[room_id] = False
                     bcc.postEvent(LiveEndEvent(room_id=room_id, timestamp=int(time.time())))
         await asyncio.sleep(config.listening.check_interval)
