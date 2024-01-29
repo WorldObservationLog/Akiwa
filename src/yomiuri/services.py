@@ -38,7 +38,7 @@ async def stop_listening(room_id: int):
 
 
 @sio.event()
-async def connect(sid, environ, auth):
+async def connect(sid, environ):
     token = parse_qs(environ["QUERY_STRING"])["token"][0]
     if token == config.config.yomiuri.token:
         clients.add(sid)
@@ -50,7 +50,8 @@ async def connect(sid, environ, auth):
 @sio.event()
 async def disconnect(sid):
     logger.info(f"Yomiuri client {sid} disconnected")
-    clients.remove(sid)
+    if sid in clients:
+        clients.remove(sid)
     if sid in available_clients:
         available_clients.remove(sid)
     if sid in room_id_client.values():
