@@ -39,14 +39,14 @@ async def check_realtime_analysis_exist(live_id):
 @bp.route("/live/all")
 async def get_lives():
     return Response(data=[Live(live_id=i.live_id, room_id=i.room_id, title=i.title,
-                               start_time=i.start_time, end_time=i.end_time) for i in await db.get_lives()])
+                               start_time=i.start_time, end_time=i.end_time) for i in await db.get_lives()]).model_dump()
 
 
 @bp.route("/live/latest/<int:room_id>")
 async def get_latest_live(room_id: int):
     latest_live = await db.get_latest_live(room_id)
     return Response(data=Live(live_id=latest_live.live_id, room_id=latest_live.room_id, title=latest_live.title,
-                              start_time=latest_live.start_time, end_time=latest_live.end_time))
+                              start_time=latest_live.start_time, end_time=latest_live.end_time)).model_dump()
 
 
 @bp.route("/live/now")
@@ -55,16 +55,16 @@ async def get_streaming_live():
         results = [Live(live_id=live.live_id, room_id=live.room_id,
                         title=live.title, start_time=live.start_time,
                         end_time=live.end_time) for live in global_vars.current_live]
-        return Response(data=results)
+        return Response(data=results).model_dump()
     else:
         return Response(data=None, error=Error(type="NO_LIVE",
-                                               message="There is not any live streaming now!"))
+                                               message="There is not any live streaming now!")).model_dump()
 
 
 @bp.route("/live/<live_id>/revenue")
 async def get_revenue(live_id: str):
     await check_analysis_exist(live_id)
-    return Response(data=Revenue(amount=analysis[live_id].du.sum_earning()))
+    return Response(data=Revenue(amount=analysis[live_id].du.sum_earning())).model_dump()
 
 
 @bp.route("/live/<live_id>/audience_compare")
@@ -206,7 +206,7 @@ async def get_followers_increment_timing(live_id: str):
 @bp.route("/live/<live_id>/realtime/revenue")
 async def get_realtime_revenue(live_id: str):
     await check_realtime_analysis_exist(live_id)
-    return Response(data=Revenue(amount=realtime_analysis.du.sum_earning()))
+    return Response(data=Revenue(amount=realtime_analysis.du.sum_earning())).model_dump()
 
 
 @bp.route("/live/<live_id>/realtime/watched")
@@ -218,7 +218,7 @@ async def get_realtime_watched(live_id: str):
         return Response(data=DataWithTimestamp(timestamp=watched["timestamp"],
                                                value=watched["data"]["count"]))
     else:
-        return Response(data=None, error=Error(type="NO_DATA", message="There is no data now!"))
+        return Response(data=None, error=Error(type="NO_DATA", message="There is no data now!")).model_dump()
 
 
 @bp.route("/live/<live_id>/realtime/paid")
@@ -230,7 +230,7 @@ async def get_realtime_paid(live_id: str):
         return Response(data=DataWithTimestamp(timestamp=paid["timestamp"],
                                                value=paid["data"]["count"]))
     else:
-        return Response(data=None, error=Error(type="NO_DATA", message="There is no data now!"))
+        return Response(data=None, error=Error(type="NO_DATA", message="There is no data now!")).model_dump()
 
 
 @bp.route("/live/<live_id>/realtime/online")
@@ -242,7 +242,7 @@ async def get_realtime_online(live_id: str):
         return Response(data=DataWithTimestamp(timestamp=online["timestamp"],
                                                value=online["data"]["count"]))
     else:
-        return Response(data=None, error=Error(type="NO_DATA", message="There is no data now!"))
+        return Response(data=None, error=Error(type="NO_DATA", message="There is no data now!")).model_dump()
 
 
 @bp.route("/live/<live_id>/realtime/popular_rank")
@@ -254,4 +254,4 @@ async def get_realtime_rank(live_id: str):
         return Response(data=DataWithTimestamp(timestamp=popular_rank["timestamp"],
                                                value=popular_rank["data"]["rank"]))
     else:
-        return Response(data=None, error=Error(type="NO_DATA", message="There is no data now!"))
+        return Response(data=None, error=Error(type="NO_DATA", message="There is no data now!")).model_dump()
