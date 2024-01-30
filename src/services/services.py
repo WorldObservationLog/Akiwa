@@ -216,7 +216,7 @@ async def get_realtime_watched(live_id: str):
     if watched:
         watched = watched[-1]
         return Response(data=DataWithTimestamp(timestamp=watched["timestamp"],
-                                               value=watched["data"]["count"]))
+                                               value=watched["data"]["count"])).model_dump()
     else:
         return Response(data=None, error=Error(type="NO_DATA", message="There is no data now!")).model_dump()
 
@@ -228,7 +228,7 @@ async def get_realtime_paid(live_id: str):
     if paid:
         paid = paid[-1]
         return Response(data=DataWithTimestamp(timestamp=paid["timestamp"],
-                                               value=paid["data"]["count"]))
+                                               value=paid["data"]["count"])).model_dump()
     else:
         return Response(data=None, error=Error(type="NO_DATA", message="There is no data now!")).model_dump()
 
@@ -240,7 +240,7 @@ async def get_realtime_online(live_id: str):
     if online:
         online = online[-1]
         return Response(data=DataWithTimestamp(timestamp=online["timestamp"],
-                                               value=online["data"]["count"]))
+                                               value=online["data"]["count"])).model_dump()
     else:
         return Response(data=None, error=Error(type="NO_DATA", message="There is no data now!")).model_dump()
 
@@ -252,6 +252,6 @@ async def get_realtime_rank(live_id: str):
     if popular_rank:
         popular_rank = popular_rank[-1]
         return Response(data=DataWithTimestamp(timestamp=popular_rank["timestamp"],
-                                               value=popular_rank["data"]["rank"]))
+                                               value=popular_rank["data"]["rank"])).model_dump()
     else:
         return Response(data=None, error=Error(type="NO_DATA", message="There is no data now!")).model_dump()
