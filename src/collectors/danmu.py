@@ -49,7 +49,7 @@ async def danmu_receiver(event: LiveStartEvent):
     global current_danmu_client
     loop = asyncio.get_running_loop()
     if config.yomiuri.enable:
-        await start_listening(room_id=event.room_id, danmu_callback=handle_danmu)
+        await start_listening(room_id=event.room_id)
     else:
         if current_danmu_client.values() or (current_danmu_client == [None] * len(current_danmu_client)):
             logger.warning("Akiwa is listening multi live rooms! It may cause danmu lost!")
