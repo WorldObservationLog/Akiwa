@@ -47,7 +47,7 @@ async def start_listening(room_id: int):
     while True:
         if available_clients:
             break
-        if not global_vars.live_status.get(room_id):
+        if global_vars.live_status and not global_vars.live_status.get(room_id):
             logger.error("Live ended without available Yomiuri client!")
             return
         logger.warning("No available Yomiuri client connected! Wait for 5 seconds")
