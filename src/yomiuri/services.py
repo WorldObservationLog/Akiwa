@@ -64,8 +64,8 @@ async def stop_listening(room_id: int):
 
 @sio.event()
 async def connect(sid, environ):
-    token = parse_qs(environ["QUERY_STRING"])["token"][0]
-    if token == config.config.yomiuri.token:
+    token = parse_qs(environ["QUERY_STRING"]).get("token")
+    if token and token[0] == config.config.yomiuri.token:
         clients.add(sid)
         logger.info(f"Yomiuri client {sid} connected")
     else:
