@@ -22,7 +22,11 @@ RUN pip install poetry && \
 # Option: added font Noto Sans SC
 # you can remove this if you don't need it
 # but don't forget to added other font
-RUN apt update && apt install -y fonts-noto-cjk
+# For Chinese users, comment line 27 and uncomment line 28 to use Gitee mirror of Noto Sans
+RUN apt update && apt install -y wget fontconfig && \
+    wget -P /usr/share/fonts/opentype https://github.com/googlefonts/noto-cjk/raw/main/Sans/Variable/TTF/Subset/NotoSansSC-VF.ttf && \
+    # wget -P /usr/share/fonts/opentype https://gitee.com/mirrors/noto-cjk/raw/main/Sans/Variable/TTF/Subset/NotoSansSC-VF.ttf && \
+    fc-cache -fv
 
 # Make port 80 and 12345 available to the world outside this container
 EXPOSE 12345
