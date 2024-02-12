@@ -139,9 +139,6 @@ def preprocess_danmu(danmu: DanmuReceivedEvent):
 
 def get_font_path(font: str):
     if not Path(font).exists():
-        # may cause lag
-        for filename in matplotlib.font_manager.findSystemFonts(fontpaths=None):
-            name, _ = ImageFont.FreeTypeFont(filename).getname()
-            if name == font:
-                return filename
+        font_properties = matplotlib.font_manager.FontProperties(family=font)
+        return matplotlib.font_manager.findfont(font_properties)
     return font
