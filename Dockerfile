@@ -7,6 +7,13 @@ WORKDIR /app
 # Add the current directory contents into the container at /app
 ADD . /app
 
+# For Chinese users
+#RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
+#    pip install poetry && \
+#    poetry source add --priority=default mirrors https://pypi.tuna.tsinghua.edu.cn/simple/ && \
+#    pip install apt-smart && \
+#    apt-smart -a
+
 # Install any needed packages specified in pyproject.toml
 RUN pip install poetry && \
   poetry config virtualenvs.create false && \
@@ -15,17 +22,7 @@ RUN pip install poetry && \
 # Option: added font Noto Sans SC
 # you can remove this if you don't need it
 # but don't forget to added other font
-RUN apt update && apt install -y \
-  fontconfig \
-  wget && \
-  mkdir -p /usr/share/fonts/opentype/noto && \
-  wget -O font.ttf "https://github.com/googlefonts/noto-cjk/raw/main/Sans/Variable/TTF/Subset/NotoSansSC-VF.ttf" && \
-  mv font.ttf /usr/share/fonts/opentype/noto/ && \
-  fc-cache -fv && \
-  apt remove -y wget && \
-  apt autoremove -y && \
-  rm -rf /var/lib/apt/lists/* && \
-  rm -rf /tmp/*
+RUN apt update && apt install -y fonts-noto-cjk
 
 # Make port 80 and 12345 available to the world outside this container
 EXPOSE 12345
